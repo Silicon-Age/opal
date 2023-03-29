@@ -1475,7 +1475,7 @@ public class MappedClass {
 							if (lclCM.isDeprecated() && isDeprecated() == false) {
 								lclBW.println("\t@Deprecated");
 							}
-							lclBW.println("\tdefault public " + lclMemberTypeName + ' ' + lclCM.getInverseObjectAccessorMethodNameOrDefault() + "() {");
+							lclBW.println("\tdefault " + lclMemberTypeName + ' ' + lclCM.getInverseObjectAccessorMethodNameOrDefault() + "() {");
 							lclBW.println("\t\tBoolean lclB = " + lclCM.getObjectAccessorName() + "();");
 							if (lclCM.isNullAllowed()) {
 								lclBW.println("\t\treturn lclB != null ? (lclB.booleanValue() ? Boolean.FALSE : Boolean.TRUE) : null;");
@@ -1484,6 +1484,7 @@ public class MappedClass {
 							}
 							lclBW.println("\t}");
 							lclBW.println();
+							
 						}
 						if (lclCM.isNullAllowed()) {
 							lclJD.start(1);
@@ -1556,7 +1557,7 @@ public class MappedClass {
 								if (lclCM.isDeprecated() && isDeprecated() == false) {
 									lclBW.println("\t@Deprecated");
 								}
-								lclBW.print("\tdefault " + lclMemberTypeName + ' ' + lclCM.getInverseAccessorMethodNameOrDefault() + "()");
+								lclBW.print("\tdefault " + lclPrimitiveType.getName() + ' ' + lclCM.getInverseAccessorMethodNameOrDefault() + "()");
 								if (lclCM.isNullAllowed()) {
 									lclBW.print(" throws " + NullValueException.class.getName());
 								}
@@ -1852,7 +1853,7 @@ public class MappedClass {
 				/* FIXME: Output Deprecated? */				
 				if (lclMFK.createMatchesPredicate()) {
 					if (("Protected".equalsIgnoreCase(lclMFK.getSourceFieldAccess()) == false) && lclMFK.appearsInSourceUserFacing()) {
-						lclBW.println("\tdefault public boolean matches(" + lclSMC.getFullyQualifiedInterfaceClassName() + " argObject) {");
+						lclBW.println("\tdefault boolean matches(" + lclSMC.getFullyQualifiedInterfaceClassName() + " argObject) {");
 						lclBW.println("\t\treturn argObject != null ? argObject." + lclMFK.getAccessorName() + "() == this : false;");
 						lclBW.println("\t}");
 						lclBW.println();
@@ -1879,7 +1880,7 @@ public class MappedClass {
 				
 				/* if (lclSMC.isEphemeral() == false) {
 					lclBW.print(lclDeprecated);
-					lclBW.println("\tdefault public int " + lclMFK.getCountMethodName() + "() {");
+					lclBW.println("\tdefault int " + lclMFK.getCountMethodName() + "() {");
 					lclBW.println("\t\treturn " + lclMFK.getRoleCollectionAccessorName() + "().size();");
 					lclBW.println("\t}");
 					lclBW.println();
@@ -1887,13 +1888,13 @@ public class MappedClass {
 				
 				
 				/* lclBW.print(lclDeprecated);
-				lclBW.println("\tdefault public " + USER_FACING_ITERATOR_CLASS.getName() + "<" + lclT + "> " + lclMFK.getIteratorMethodName() + "() {");
+				lclBW.println("\tdefault " + USER_FACING_ITERATOR_CLASS.getName() + "<" + lclT + "> " + lclMFK.getIteratorMethodName() + "() {");
 				lclBW.println("\t\treturn " + lclMFK.getRoleCollectionAccessorName() + "().iterator();");
 				lclBW.println("\t}");
 				lclBW.println(); */
 				
 				lclBW.print(lclDeprecated);
-				lclBW.println("\tdefault public " + USER_FACING_STREAM_CLASS.getName() + "<" + lclT + "> " + lclMFK.getStreamMethodName() + "() {");
+				lclBW.println("\tdefault " + USER_FACING_STREAM_CLASS.getName() + "<" + lclT + "> " + lclMFK.getStreamMethodName() + "() {");
 				lclBW.println("\t\treturn " + lclMFK.getRoleCollectionAccessorName() + "().stream();");
 				lclBW.println("\t}");
 				lclBW.println();
@@ -1901,7 +1902,7 @@ public class MappedClass {
 				// if (lclSMC.isEphemeral() == false) {
 					// lclBW.print(lclDeprecated);
 					// printRequiresActiveTransactionAnnotation(lclBW, 1);
-					// lclBW.println("\tdefault public " + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ' ' + lclMFK.getAddMethodName() + "(" + lclT + ' ' + lclA + ") {");
+					// lclBW.println("\tdefault " + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ' ' + lclMFK.getAddMethodName() + "(" + lclT + ' ' + lclA + ") {");
 					// lclBW.println("\t\t" + lclMFK.getRoleCollectionAccessorName() + "().add(" + lclA + ");");
 					// lclBW.println("\t\treturn (" + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ") this;");
 					// lclBW.println("\t}");
@@ -1909,7 +1910,7 @@ public class MappedClass {
 					
 					// /* lclBW.print(lclDeprecated);
 					// printRequiresActiveTransactionAnnotation(lclBW, 1);
-					// lclBW.println("\tdefault public " + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ' ' + lclMFK.getRemoveMethodName() + "(" + lclT + ' ' + lclA + ") {");
+					// lclBW.println("\tdefault " + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ' ' + lclMFK.getRemoveMethodName() + "(" + lclT + ' ' + lclA + ") {");
 					// lclBW.println("\t\t" + lclMFK.getRoleCollectionAccessorName() + "().remove(" + lclA + ");");
 					// lclBW.println("\t\treturn (" + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ") this;");
 					// lclBW.println("\t}");
@@ -1917,7 +1918,7 @@ public class MappedClass {
 				// }
 				
 				/* lclBW.print(lclDeprecated);
-				lclBW.println("\tdefault public <T extends " + ACQUIRE_COLLECTION_INTERFACE.getName() + "<? super " + lclT + ">> T " + lclMFK.getAcquireMethodName() + "(T argC) {");
+				lclBW.println("\tdefault <T extends " + ACQUIRE_COLLECTION_INTERFACE.getName() + "<? super " + lclT + ">> T " + lclMFK.getAcquireMethodName() + "(T argC) {");
 				lclBW.println("\t\t" + Validate.class.getName() + ".notNull(argC, \"Target Collection is null\");");
 				lclBW.println("\t\targC.addAll(" + lclMFK.getRoleCollectionAccessorName() + "());");
 				lclBW.println("\t\treturn argC;");
@@ -1925,7 +1926,7 @@ public class MappedClass {
 				lclBW.println(); */
 				if (lclSMC.isEphemeral() == false) {
 					lclBW.print(lclDeprecated);
-					lclBW.println("\tdefault public " + lclT + "[] " + lclMFK.getArrayMethodName() + "() {");
+					lclBW.println("\tdefault " + lclT + "[] " + lclMFK.getArrayMethodName() + "() {");
 					lclBW.println("\t\t" + USER_FACING_SET_CLASS.getName() + "<" + lclT +"> lclS = " + lclMFK.getRoleCollectionAccessorName() + "();");
 					lclBW.println("\t\treturn lclS.toArray(new " + lclT + "[lclS.size()]);");
 					lclBW.println("\t}");
@@ -1933,7 +1934,7 @@ public class MappedClass {
 				} else {
 					// TODO: What's up with this?  Why HTTP_...?  Why is this different?
 					lclBW.print(lclDeprecated);
-					lclBW.println("\tdefault public " + lclT + "[] " + lclMFK.getArrayMethodName() + "() {");
+					lclBW.println("\tdefault " + lclT + "[] " + lclMFK.getArrayMethodName() + "() {");
 					lclBW.println("\t\t" + HTTP_MULTIPLE_INTERMEDIATE_COLLECTION_CLASS.getName() + "<" + lclT + "> lclList = new " + CREATE_ARRAY_INTERMEDIATE_COLLECTION_CLASS.getName() + "<>();");
 					lclBW.println("\t\t" + lclMFK.getAcquireMethodName() + "(lclList);");
 					lclBW.println("\t\treturn lclList.toArray(new " + lclT + "[lclList.size()]);");
@@ -1987,7 +1988,7 @@ public class MappedClass {
 			// TODO: Copy annotations
 			for (MethodDelegation lclMD : getMethodDelegations()) {
 				// lclBW.println("\t@Override");
-				lclBW.print("\tdefault public " + OpalUtility.generateJavaDeclaration(lclMD.getReturnType()) + ' ' + lclMD.getLocalMethodName() + "(");
+				lclBW.print("\tdefault " + OpalUtility.generateJavaDeclaration(lclMD.getReturnType()) + ' ' + lclMD.getLocalMethodName() + "(");
 				Type[] lclParameters = lclMD.getParameters();
 				if (lclParameters != null) {
 					for (int lclI = 0; lclI < lclParameters.length; ++lclI) {
@@ -2171,7 +2172,7 @@ public class MappedClass {
 				lclBW.println("\t\t}");
 				lclBW.println("\t}");
 				lclBW.println();
-				lclBW.println("\tdefault public " + Tree.class.getName() + '<' + lclFQICN + "> asTree() {");
+				lclBW.println("\tdefault " + Tree.class.getName() + '<' + lclFQICN + "> asTree() {");
 				lclBW.println("\t\treturn new " + Tree.class.getName() + "<>((" + lclFQICN + ") this, " + lclTA + ".getInstance());");
 				lclBW.println("\t}");
 			}
@@ -4891,11 +4892,11 @@ public class MappedClass {
 	}
 	
 	public boolean isView() {
-		return myView.asBoolean(getTrueEntityType() == EntityType.View);
+		return myView.asBooleanPrimitive(getTrueEntityType() == EntityType.View);
 	}
 	
 	public boolean isTable() {
-		return myView.not().asBoolean(getTrueEntityType() == EntityType.Table);
+		return myView.not().asBooleanPrimitive(getTrueEntityType() == EntityType.Table);
 	}
 	
 	public EntityType getTrueEntityType() {
@@ -4911,7 +4912,7 @@ public class MappedClass {
 	}
 	
 	public boolean isCreatable() {
-		return myCreatable.asBoolean(isTable());
+		return myCreatable.asBooleanPrimitive(isTable());
 	}
 	
 	public Trinary getUpdatable() {
@@ -4919,7 +4920,7 @@ public class MappedClass {
 	}
 	
 	public boolean isUpdatable() {
-		return myUpdatable.asBoolean(isTable());
+		return myUpdatable.asBooleanPrimitive(isTable());
 	}
 	
 	public boolean isImmutableOpal() {
@@ -5892,7 +5893,7 @@ public class MappedClass {
 	}
 	
 	public boolean isEphemeral() {
-		return getEphemeral().asBoolean(isView());
+		return getEphemeral().asBooleanPrimitive(isView());
 	}
 	
 	public Trinary hasBackCollectionsByDefault() {
