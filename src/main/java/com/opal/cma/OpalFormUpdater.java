@@ -403,7 +403,7 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 				long lclThisFormLoaded = Long.parseLong(lclFormLoadTimestampString);
 				Long lclPreviousSubmission = OpalFormUpdateTimes.getInstance().get(lclUserFacing); // may be null
 				
-				if (lclPreviousSubmission != null && lclThisFormLoaded <= lclPreviousSubmission) { // Equality is a weird situation.  Complaining seems like the safest choice.
+				if (lclPreviousSubmission != null && lclThisFormLoaded <= lclPreviousSubmission.longValue()) { // Equality is a weird situation.  Complaining seems like the safest choice.
 					addError("Between the time you loaded the form and the time you submitted it, other changes were made, perhaps by another user. Please reset the form to load the otherwise updated values and try your changes again.");
 					return;
 				} else {
@@ -937,16 +937,18 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 		String lclParam = getPrefixedParameter(argFieldName);
 		IdentityUserFacing lclUF = getUserFacing();
 		
-		if (StringUtils.isEmpty(lclParam)) {
-			if (getUserFacing().isNew() && isRequired(argFieldName) && providesDefaultFor(argFieldName) == false) {
-				if (getParent() == null || argType.isAssignableFrom(getParent().getClass()) == false) {
-					/* TODO: This isn't perfect.  But the idea is that if we're creating this UserFacing as a child, then we don't need to set its parent here. */
-					addError(argFieldName, argFieldName + " is required.");
-				}
-			}
-		} else {
+//		if (StringUtils.isEmpty(lclParam)) {
+//			if (getUserFacing().isNew() && isRequired(argFieldName) && providesDefaultFor(argFieldName) == false) {
+//				if (getParent() == null || argType.isAssignableFrom(getParent().getClass()) == false) {
+//					/* TODO: This isn't perfect.  But the idea is that if we're creating this UserFacing as a child, then we don't need to set its parent here. */
+//					addError(argFieldName, argFieldName + " is required.");
+//				}
+//			}
+//		} else {
 			/* Did the form ask the user to input this information? */
-			// ourLogger.debug("Found opal accessor " + lclM.getName());
+			if (ourLogger.isDebugEnabled()) {
+				ourLogger.debug("Working on "+ argFieldName + "; posted value is \"" + lclParam + "\"");
+			}
 			/* FIXME: This should use the new FactoryMap by default. */
 			IdentityFactory<? extends IdentityUserFacing> lclTargetFactory = determineReferenceFactory(argFieldName, argType);
 			IdentityUserFacing lclTarget;
@@ -966,7 +968,9 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 			}
 			// ourLogger.debug("lclTarget = " + lclTarget);
 			if (lclTarget == null && isRequired(argFieldName)) {
-				addError(argFieldName, argFieldName + " is required.");
+				if (getUserFacing().isNew() && providesDefaultFor(argFieldName) == false) {
+					addError(argFieldName, argFieldName + " is required.");
+				}
 			}
 			Method lclSet = null;
 			try {
@@ -975,7 +979,7 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 			} catch (Exception lclE) { /* FIXME:  List possible exceptions */
 				throw new IllegalStateException("Could not update target reference for " + argFieldName + "; lclUF = " + lclUF.toString() + " lclSet = " + String.valueOf(lclSet) + " lclTarget = " + String.valueOf(lclTarget), lclE);
 			}
-		}
+//		}
 	}
 	
 	@RequiresActiveTransaction
