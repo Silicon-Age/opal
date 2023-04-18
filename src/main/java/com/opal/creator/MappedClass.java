@@ -310,6 +310,25 @@ public class MappedClass {
 			getForeignKeysTo().add(argFK);
 		}
 	}
+
+	protected boolean createSupplierInterface() { // THINK: Maybe we want to let the user manually request such an interface?
+		return getForeignKeysTo().stream()
+				.filter(x -> "Protected".equalsIgnoreCase(x.getSourceFieldAccess()) == false)
+				.filter(MappedForeignKey::appearsInSourceUserFacing)
+				.anyMatch(MappedForeignKey::createMatchesPredicate);
+	}
+	
+	protected boolean createMatchesMethod() {
+		return createSupplierInterface();
+	}
+	
+	protected String getSupplierInterfaceName() {
+		return getInterfaceClassName() + "Supplier";
+	}
+	
+	protected String getSupplierAccessorName() {
+		return "get" + getInterfaceClassName();
+	}
 	
 	protected void createImplementation() throws IOException {
 		String lclAbstractClassFileName = StringUtility.makeFilename(getSourceDirectory(), getImplementationPackageName(), getImplementationClassName());
@@ -1257,6 +1276,7 @@ public class MappedClass {
 				lclBW.println("\t\t" + lclOCN + " lclOpal = getOpalFactory().forUniqueString(argUniqueString);");
 				lclBW.println("\t\treturn lclOpal != null ? lclOpal.getUserFacing() : null;");
 				lclBW.println("\t}");
+				lclBW.println();
 			}
 			
 			lclBW.println("}");
@@ -1353,9 +1373,6 @@ public class MappedClass {
 			
 			lclBW.println("package " + getUserFacingPackageName() + ';');
 			lclBW.println();
-			// lclBW.println("import java.io.*;");
-			// lclBW.println("import com.opal.*;");
-			// lclBW.println("import " + getFullyQualifiedInterfaceClassName() + ';');
 			lclBW.println();
 			
 			/* Does this class have an intrinsic order? */
@@ -1394,6 +1411,16 @@ public class MappedClass {
 			
 			if (lclOrderingMember != null) {
 				lclBW.print(", Comparable<" + getFullyQualifiedInterfaceClassName() + '>');
+			}
+			
+			/* If this object can act as a supplier of another object (due to the existence of a foreign key), add the
+			 * appropriate interface marking that.  Note that these are not instances of Supplier<T>, because an object
+			 * can't implement Supplier (or any generic interface) twice with different type variables.
+			 */
+			for (MappedForeignKey lclMFK : getForeignKeysFrom()) {
+				if (lclMFK.createMatchesPredicate()) { // FIXME: AddSupplierInterface()
+					lclBW.print(", " + lclMFK.getTargetMappedClass().getFullyQualifiedUserFacingClassName() + "." + lclMFK.getTargetMappedClass().getSupplierInterfaceName()); // FIXME: Helper method
+				}
 			}
 			
 			lclBW.println(" {");
@@ -1836,6 +1863,14 @@ public class MappedClass {
 			/* Handle database foreign keys coming into this class that represent many-to-one relationships.  (That is,
 			 * the source columns aren't covered by a unique index converting them into a zero/one-to-one relationship.)
 			 */
+			
+			if (createMatchesMethod()) {
+				lclBW.println("\tdefault boolean matches(" + getSupplierInterfaceName() + " argSupplier) {");
+				lclBW.println("\t\treturn (argSupplier != null) ? argSupplier." + getSupplierAccessorName() + "() == this : false;");
+				lclBW.println("\t}");
+				lclBW.println();
+			}
+
 			for (MappedForeignKey lclMFK : getForeignKeysTo()) {
 				MappedClass lclSMC = lclMFK.getSourceMappedClass();
 				
@@ -1847,18 +1882,18 @@ public class MappedClass {
 					continue;
 				}
 				
-				/* FIXME: For aesthetic reasons, I'd prefer to move this below the "more fundamental" methods dealing with
-				 * the back collection.
-				 */
-				/* FIXME: Output Deprecated? */				
-				if (lclMFK.createMatchesPredicate()) {
-					if (("Protected".equalsIgnoreCase(lclMFK.getSourceFieldAccess()) == false) && lclMFK.appearsInSourceUserFacing()) {
-						lclBW.println("\tdefault boolean matches(" + lclSMC.getFullyQualifiedInterfaceClassName() + " argObject) {");
-						lclBW.println("\t\treturn argObject != null ? argObject." + lclMFK.getAccessorName() + "() == this : false;");
-						lclBW.println("\t}");
-						lclBW.println();
-					}
-				}
+//				/* FIXME: For aesthetic reasons, I'd prefer to move this below the "more fundamental" methods dealing with
+//				 * the back collection.
+//				 */
+//				/* FIXME: Output Deprecated? */				
+//				if (lclMFK.createMatchesPredicate()) {
+//					if (("Protected".equalsIgnoreCase(lclMFK.getSourceFieldAccess()) == false) && lclMFK.appearsInSourceUserFacing()) {
+//						lclBW.println("\tdefault boolean matches(" + lclSMC.getFullyQualifiedInterfaceClassName() + " argObject) {");
+//						lclBW.println("\t\treturn argObject != null ? argObject." + lclMFK.getAccessorName() + "() == this : false;");
+//						lclBW.println("\t}");
+//						lclBW.println();
+//					}
+//				}
 				
 				if (lclMFK.hasBackCollection() == false) {
 					continue;
@@ -2175,7 +2210,16 @@ public class MappedClass {
 				lclBW.println("\tdefault " + Tree.class.getName() + '<' + lclFQICN + "> asTree() {");
 				lclBW.println("\t\treturn new " + Tree.class.getName() + "<>((" + lclFQICN + ") this, " + lclTA + ".getInstance());");
 				lclBW.println("\t}");
+				lclBW.println();
 			}
+			
+			if (createSupplierInterface()) {
+				lclBW.println("\tpublic interface " + getSupplierInterfaceName() + " {");
+				lclBW.println("\t\tpublic " + getFullyQualifiedInterfaceClassName() + " " + getSupplierAccessorName() + "();");
+				lclBW.println("\t}");
+				lclBW.println();
+			}
+						
 			lclBW.println("}");
 		} // Closes lclBW with try-with-resources
 	}

@@ -907,8 +907,10 @@ public class MappedForeignKey implements Comparable<MappedForeignKey> {
 		return getDependents().isEmpty() == false;
 	}
 	
-	public boolean createMatchesPredicate() { // FIXME: Make this configurable
-		return "".equals(getSourceRolePrefix());
+	public boolean createMatchesPredicate() { // FIXME: Make this configurable // FIXME: New name?
+		return ("Protected".equalsIgnoreCase(getSourceFieldAccess()) == false) &&
+				appearsInSourceUserFacing() &&
+				"".equals(getSourceRolePrefix());
 	}
 
 	public ReferentialAction getDeleteAction() {
