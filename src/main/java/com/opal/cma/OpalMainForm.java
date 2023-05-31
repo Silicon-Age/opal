@@ -199,6 +199,7 @@ public class OpalMainForm<U extends IdentityUserFacing> extends OpalForm<U> {
 			hidden("CancelURI", getCancelURI()) +
 			hidden("DeleteURI", getDeleteURI()) +
 			hidden("UniqueStringParameterName", getUniqueStringParameterName()) +
+			hidden("SubmissionConflictMessage", getConfiguration().getSubmissionConflictMessage()) +
 			getConfiguration().afterOpen();
 	}
 	

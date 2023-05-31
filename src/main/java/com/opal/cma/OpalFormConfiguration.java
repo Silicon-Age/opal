@@ -154,4 +154,8 @@ public class OpalFormConfiguration {
 		
 		return "";
 	}
+	
+	protected String getSubmissionConflictMessage() {
+		return "Between the time you loaded the form and the time you submitted it, other changes were made, perhaps in another tab or by another user. Please use the &#8220;" + getDefaultCancelButtonLabel() + "&#8221; button to reset the form, then try your changes again.";
+	}
 }

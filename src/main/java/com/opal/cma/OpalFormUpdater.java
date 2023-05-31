@@ -404,7 +404,7 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 				Long lclPreviousSubmission = OpalFormUpdateTimes.getInstance().get(lclUserFacing); // may be null
 				
 				if (lclPreviousSubmission != null && lclThisFormLoaded <= lclPreviousSubmission.longValue()) { // Equality is a weird situation.  Complaining seems like the safest choice.
-					addError("Between the time you loaded the form and the time you submitted it, other changes were made, perhaps in another tab or by another user. Please reset the form to load the otherwise updated values and try your changes again.");
+					addError(getPrefixedParameter("SubmissionConflictMessage"));
 					return;
 				} else {
 					// There is no problem.
