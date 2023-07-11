@@ -45,13 +45,11 @@ public abstract class TypeOpalRestlet<U extends IdentityUserFacing, A> extends O
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	protected boolean checkAccess(U argUF, A argCredential) {
 		return true; // Type tables don't generally have complicated permissions
 	}
 	
 	@Override
-	@SuppressWarnings("unused")
 	protected Collection<U> executeSearch(HttpServletRequest argRequest, A argCredential) throws RestResultException {
 		return getFactory().getAll();
 	}
