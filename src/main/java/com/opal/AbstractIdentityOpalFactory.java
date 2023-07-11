@@ -275,7 +275,6 @@ public abstract class AbstractIdentityOpalFactory<U extends IdentityUserFacing, 
 		throw new IllegalArgumentException("\"" + argFieldName + "\" is not a valid field name.");
 	}
 	
-	@SuppressWarnings("javadoc")
 	/**
 	 * Must only be called when the thread has a lock on argOpal!!!
 	 */
