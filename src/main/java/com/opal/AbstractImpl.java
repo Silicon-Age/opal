@@ -78,10 +78,12 @@ public abstract class AbstractImpl<U extends UserFacing, O extends Opal<? extend
 	
 	public void setField(int argFieldIndex, Object argValue) {
 		Opal<? extends U> lclOpal = getBottomOpal();
-		if (lclOpal instanceof UpdatableOpal) {
-			((UpdatableOpal<? extends U>) lclOpal).setField(argFieldIndex, argValue);
-		} else {
+		if (lclOpal instanceof UpdatableOpal<? extends U> lclUO) {
+			lclUO.setField(argFieldIndex, argValue);
+		} else if (lclOpal instanceof ImmutableOpal<? extends U> lclIO) {
 			throw new UnsupportedOperationException("Called setField on UserFacing backed by ImmutableOpal.");
+		} else {
+			throw new UnsupportedOperationException("Called setField on UserFacing backed by unknown Opal type.");
 		}
 	}
 	
