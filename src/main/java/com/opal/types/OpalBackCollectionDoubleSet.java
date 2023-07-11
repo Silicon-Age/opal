@@ -15,11 +15,12 @@ import com.opal.Opal;
 import com.opal.PersistenceException;
 import com.opal.TransactionContext;
 import com.opal.TransactionParameter;
+import com.opal.TransactionalOpal;
 import com.opal.UpdatableOpal;
 import com.siliconage.util.Fast3Set;
 
 /* C = child opal (contained in the Set), P = parent opal (owner of the Set) */
-public class OpalBackCollectionDoubleSet<C extends Opal<?>, P extends Opal<?>> extends AbstractOpalBackCollectionSet<C, P> {
+public class OpalBackCollectionDoubleSet<C extends TransactionalOpal<?>, P extends TransactionalOpal<?>> extends AbstractOpalBackCollectionSet<C, P> {
 	
 	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalBackCollectionDoubleSet.class.getName());
 	

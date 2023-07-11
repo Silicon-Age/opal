@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.Validate;
 
-public abstract class Opal<U extends UserFacing> extends AbstractTransactionAware /* implements Serializable */ {
+public interface Opal<U extends UserFacing> /* extends AbstractTransactionAware */ /* implements Serializable */ {
 
 	//	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(Opal.class.getName());
 	
@@ -18,10 +18,10 @@ public abstract class Opal<U extends UserFacing> extends AbstractTransactionAwar
 	
 	/* FEATURE: This should be transient or removed in favor of a lookup to a list of physical stores. */
 	
-	private final OpalFactory<U, ? extends Opal<U>> myAbstractOpalFactory;
+//	private final OpalFactory<U, ? extends Opal<U>> myAbstractOpalFactory;
 	
 	/* This is "basically final":  Once it is set, it should never be changed. */
-	/* final */ private U myUserFacing; /* FIXME: Is there a way to make this actually final? */
+//	/* final */ private U myUserFacing; /* FIXME: Is there a way to make this actually final? */
 
 //	private boolean myDataRead = false;
 	
@@ -29,88 +29,83 @@ public abstract class Opal<U extends UserFacing> extends AbstractTransactionAwar
 	 * This should only be used to construct the NOT_YET_LOADED placeholders.
 	 */
 	 
-	protected Opal() {
-		super();
-		myAbstractOpalFactory = null;
-	}
+//	protected Opal() {
+//		super();
+//		myAbstractOpalFactory = null;
+//	}
 	
-	protected <O extends Opal<U>> Opal(OpalFactory<U, O> argOpalFactory) {
-		super();
-		
-		Validate.notNull(argOpalFactory);
-		
-		/* TODO: Can I remove the warning on this line? */
-		myAbstractOpalFactory = argOpalFactory;
-		
-		initializeReferences();
-	}
+//	protected <O extends Opal<U>> Opal(OpalFactory<U, O> argOpalFactory) {
+//		super();
+//		
+//		Validate.notNull(argOpalFactory);
+//		
+//		/* TODO: Can I remove the warning on this line? */
+//		myAbstractOpalFactory = argOpalFactory;
+//		
+//		initializeReferences();
+//	}
 	
-	protected void initializeReferences() {
-		return;
-	}
+//	protected void initializeReferences() {
+//		return;
+//	}
 	
+	public U getUserFacing();
+	
+//	public U getUserFacing() {
+//		return myUserFacing;
+//	}
+	
+//	public void setUserFacing(U argUserFacing) {
+//		myUserFacing = argUserFacing;
+//	}
+	
+//	@Override
+//	protected final TransactionParameter extractTransactionParameter(Map<DataSource, TransactionParameter> argTPMap) {
+//		return getOpalFactory().extractTransactionParameter(argTPMap);
+//	}
+	
+//	@Override
+//	public final boolean equals(Object lclO) {
+////		ourLogger.debug(this + "/" + System.identityHashCode(this) + " and " + lclO + "/" + System.identityHashCode(lclO));
+//		return this == lclO;
+//	}
+	
+//	public abstract boolean exists();
 
-	public U getUserFacing() {
-		return myUserFacing;
-	}
+//	public int getFieldCount();
 	
-	public void setUserFacing(U argUserFacing) {
-		myUserFacing = argUserFacing;
-	}
+//	protected abstract int getFieldCount();
 	
-	@Override
-	protected final TransactionParameter extractTransactionParameter(Map<DataSource, TransactionParameter> argTPMap) {
-		return getOpalFactory().extractTransactionParameter(argTPMap);
-	}
+//	public final OpalFactory<U, ? extends Opal<U>> getOpalFactory() {
+//		return myAbstractOpalFactory;
+//	}
 	
-	@Override
-	public final boolean equals(Object lclO) {
-//		ourLogger.debug(this + "/" + System.identityHashCode(this) + " and " + lclO + "/" + System.identityHashCode(lclO));
-		return this == lclO;
-	}
-	
-	public abstract boolean exists();
-	
-	protected abstract int getFieldCount();
-	
-	public final OpalFactory<U, ? extends Opal<U>> getOpalFactory() {
-		return myAbstractOpalFactory;
-	}
-	
-	@Override
-	public final int hashCode() {
-//		ourLogger.debug("hashCode for " + this + " is " + super.hashCode());
-		return super.hashCode();
-	}
+//	@Override
+//	public final int hashCode() {
+////		ourLogger.debug("hashCode for " + this + " is " + super.hashCode());
+//		return super.hashCode();
+//	}
 		
 	/* Must be synchronized when you call this */
 	
-	protected void leaveTransactionContextInternal() {
-		ensureMonitor();
-	}
+//	protected void leaveTransactionContextInternal() {
+//		ensureMonitor();
+//	}
 	
-	@Override
-	protected void rollbackInternal() {
-		return;
-	}
+//	@Override
+//	protected void rollbackInternal() {
+//		return;
+//	}
 	
-	public abstract void translateReferencesToFields();
+//	public abstract void translateReferencesToFields();
 	
-	public Object getField(String argFieldName) {
-		return getField(getFieldIndex(argFieldName));
-	}
+//	public Object getField(String argFieldName) {
+//		return getField(getFieldIndex(argFieldName));
+//	}
+
+	public Object getField(int argFieldIndex);
 	
-	public abstract Object getField(int argFieldIndex);
-	
-	public Class<?> getFieldType(String argFieldName) {
-		return getFieldType(getFieldIndex(argFieldName));
-	}
-	
-	public Class<?> getFieldType(int argFieldIndex) {
-		return getFieldTypes()[argFieldIndex];
-	}
-	
-	public int getFieldIndex(String argFieldName) {
+	default int getFieldIndex(String argFieldName) {
 		Validate.notNull(argFieldName);
 		String[] lclFieldNames = getFieldNames();
 		for (int lclI = 0; lclI < lclFieldNames.length; ++lclI) {
@@ -120,54 +115,74 @@ public abstract class Opal<U extends UserFacing> extends AbstractTransactionAwar
 		}
 		throw new IllegalArgumentException("\"" + argFieldName + "\" is not a valid field name.");
 	}
+
+	public String[] getFieldNames();
+	public Class<?>[] getFieldTypes();
+	public boolean[] getFieldNullability();
+	public FieldValidator[] getFieldValidators();
+
+	default int getFieldCount() {
+		return getFieldNames().length;
+	}
 	
-	protected abstract String[] getFieldNames();
-	protected abstract Class<?>[] getFieldTypes();
-	protected abstract boolean[] getFieldNullability();
-	protected abstract FieldValidator[] getFieldValidators();
-	
-	public String getFieldName(int argFieldIndex) {
+	default String getFieldName(int argFieldIndex) {
 		return getFieldNames()[argFieldIndex];
 	}
 	
-	public boolean getFieldNullability(String argFieldName) {
+	default Class<?> getFieldType(String argFieldName) {
+		return getFieldType(getFieldIndex(argFieldName));
+	}
+	
+	default Class<?> getFieldType(int argFieldIndex) {
+		return getFieldTypes()[argFieldIndex];
+	}
+	
+	default boolean getFieldNullability(String argFieldName) {
 		return getFieldNullability(getFieldIndex(argFieldName));
 	}
-	
-	public boolean getFieldNullability(int argFieldIndex) {
+
+	default boolean getFieldNullability(int argFieldIndex) {
 		return getFieldNullability()[argFieldIndex];
 	}
-	
-	public FieldValidator getFieldValidator(String argFieldName) {
+
+	default FieldValidator getFieldValidator(String argFieldName) {
 		return getFieldValidator(getFieldIndex(argFieldName));
 	}
-	
-	public FieldValidator getFieldValidator(int argFieldIndex) {
+
+	default FieldValidator getFieldValidator(int argFieldIndex) {
 		return getFieldValidators()[argFieldIndex];
 	}
-	
-	protected abstract String toStringField(int argFieldIndex);
-	
-	protected abstract void copyOldValuesToNew();
-	
-	protected abstract void copyNewValuesToOld();
+
+//	protected abstract String toStringField(int argFieldIndex);
+//	
+//	protected abstract void copyOldValuesToNew();
+//	
+//	protected abstract void copyNewValuesToOld();
 		
-	@Override
-	protected /* synchronized */ void joinTransactionContextInternal() {
-		ensureMonitor();
-		copyOldValuesToNew();
-		return;
-	}
+//	@Override
+//	protected /* synchronized */ void joinTransactionContextInternal() {
+//		ensureMonitor();
+//		copyOldValuesToNew();
+//		return;
+//	}
 	
-	@Override
-	public abstract Set<TransactionAware> getRequiredPriorCommits();
+//	@Override
+//	public abstract Set<TransactionAware> getRequiredPriorCommits();
 
-	@Override
-	public abstract Set<TransactionAware> getRequiredSubsequentCommits();
+//	@Override
+//	public abstract Set<TransactionAware> getRequiredSubsequentCommits();
 
-	public abstract void output(PrintStream argPS) throws IOException;
+//	default String defaultToString() {
+//		return getClass().getName() + "@" + System.identityHashCode(this);
+//	}
 	
-	public abstract void output(PrintWriter argPW) throws IOException;
+	public void output(PrintStream argPS) throws IOException;
+
+//	public abstract void output(PrintStream argPS) throws IOException;
+
+	public void output(PrintWriter argPW) throws IOException;
+
+//	public abstract void output(PrintWriter argPW) throws IOException;
 	
 //	/* TODO:  This method should eventually go away. */
 //	protected void markAsDataRead() {

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 
-public abstract class ImmutableOpal<U extends IdentityUserFacing> extends IdentityOpal<U> {
+public abstract non-sealed class ImmutableOpal<U extends IdentityUserFacing> extends IdentityOpal<U> {
 
 	//	protected <O extends Opal<U>> ImmutableOpal(OpalFactory<O> argOpalFactory) {
 //		super(argOpalFactory);

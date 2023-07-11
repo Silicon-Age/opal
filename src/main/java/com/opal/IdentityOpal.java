@@ -1,6 +1,6 @@
 package com.opal;
 
-public abstract class IdentityOpal<U extends IdentityUserFacing> extends Opal<U> {
+public abstract sealed class IdentityOpal<U extends IdentityUserFacing> extends TransactionalOpal<U> permits UpdatableOpal<U>, ImmutableOpal<U> {
 
 	protected IdentityOpal() {
 		super();

@@ -1598,9 +1598,9 @@ public class MappedClass {
 								if (lclCM.isDeprecated() && isDeprecated() == false) {
 									lclBW.println("\t@Deprecated");
 								}
-								lclBW.println("\tdefault " + lclPrimitiveType.getName() + ' ' + lclCM.getPrimitiveAccessorName() + "(" + lclPrimitiveType.getName() + " argStringToSubstituteIfNull) {");
+								lclBW.println("\tdefault " + lclPrimitiveType.getName() + ' ' + lclCM.getPrimitiveAccessorName() + "(" + lclPrimitiveType.getName() + " argValueToSubstituteIfNull) {");
 								lclBW.println("\t\t" + lclMemberTypeName + " lclO = " + lclCM.getObjectAccessorName() + "();");
-								lclBW.println("\t\treturn lclO != null ? lclO." + TypeUtility.getPrimitiveAccessor(lclMemberType) + "() : argStringToSubstituteIfNull;");
+								lclBW.println("\t\treturn (lclO != null) ? lclO." + TypeUtility.getPrimitiveAccessor(lclMemberType) + "() : argValueToSubstituteIfNull;");
 								lclBW.println("\t}");
 								lclBW.println();
 								
@@ -1609,7 +1609,7 @@ public class MappedClass {
 								}
 								lclBW.println("\tdefault " + String.class.getName() + ' ' + lclCM.getPrimitiveAccessorName() + "(" + String.class.getName() + " argStringToSubstituteIfNull) {");
 								lclBW.println("\t\t" + lclMemberTypeName + " lclO = " + lclCM.getObjectAccessorName() + "();");
-								lclBW.println("\t\treturn lclO != null ? String.valueOf(lclO) : argStringToSubstituteIfNull;"); // FIXME: Handle dates differently?
+								lclBW.println("\t\treturn (lclO != null) ? String.valueOf(lclO) : argStringToSubstituteIfNull;"); // TODO: Handle dates differently?
 								lclBW.println("\t}");
 								lclBW.println();
 							}
@@ -2270,9 +2270,9 @@ public class MappedClass {
 				}
 			}
 			lclBW.print("public final class " + lclOCN + " extends " + lclSuperClassName + "<" + lclICN + ">");
-			/* if (lclSuperClass == ImmutableOpal.class && isEphemeral() == false) {
-				lclBW.print(" implements com.opal.IdentityOpal<" + lclICN + ">");
-			} */
+			if (isEphemeral() /* && hasPublicFields */) {
+				lclBW.print(" implements " + com.opal.PublicFields.class.getName());
+			}
 			lclBW.println(" {");
 			
 			lclBW.println();
@@ -2295,14 +2295,21 @@ public class MappedClass {
 			
 			/* Constructor */
 			
-			lclBW.println("\tprivate " + getOpalClassName() + "() {");
-			lclBW.println("\t\tsuper();");
-			lclBW.println("\t\tsetUserFacing(null);");
-			lclBW.println("\t}");
-			lclBW.println();
+			if (isEphemeral() == false) {
+				lclBW.println("\tprivate " + getOpalClassName() + "() {");
+				lclBW.println("\t\tsuper();");
+				lclBW.println("\t\tsetUserFacing(null);");
+				lclBW.println("\t}");
+				lclBW.println();
+			}
 			
 			lclBW.println("\tpublic " + getOpalClassName() + "(" + lclOpalFactoryClass.getName() + '<' + lclICN + ", " + lclOCN + "> argOpalFactory, Object[] argValues) {");
-			lclBW.println("\t\tsuper(argOpalFactory, argValues);");
+			if (isEphemeral() == false) {
+				lclBW.println("\t\tsuper(argOpalFactory, argValues);");
+			} else {
+				lclBW.println("\t\tsuper(null, argValues);");
+				lclBW.println("\t\tinitializeReferences();");
+			}
 			lclBW.println("\t}");
 			lclBW.println();
 			
@@ -2373,7 +2380,9 @@ public class MappedClass {
 			}
 			
 			if (hasAtLeastOneReference()) {
-				lclBW.println("\t@Override");
+				if (isEphemeral() == false) {
+					lclBW.println("\t@Override");
+				}
 				if (hasAtLeastOneDeprecatedReference()) {
 					lclBW.println("\t@SuppressWarnings(\"deprecation\")");
 				}
@@ -2466,25 +2475,30 @@ public class MappedClass {
 			/* The NOT_YET_LOADED marker.  Aesthetically, I would like to create this at the very top of the file, but we
 			 * shouldn't be instantiating instances of a class until all of its static fields have been initialized. */
 			
-			lclBW.println("\tpublic static final " + lclOCN + ' ' + NOT_YET_LOADED_STATIC_MEMBER_NAME + " = new " + lclOCN + "();");
-			lclBW.println();
+			if (isEphemeral() == false) {
+				lclBW.println("\tpublic static final " + lclOCN + ' ' + NOT_YET_LOADED_STATIC_MEMBER_NAME + " = new " + lclOCN + "();");
+				lclBW.println();
+			}
 			
 			lclBW.println("\tpublic static String[] getStaticFieldNames() { return ourFieldNames; }");
+			lclBW.println();
+			lclBW.println("\t@Override");
+			lclBW.println("\tpublic final String[] getFieldNames() { return getStaticFieldNames(); }");
 			lclBW.println();
 			lclBW.println("\tpublic static Class<?>[] getStaticFieldTypes() { return ourFieldTypes; }");
 			lclBW.println();
 			lclBW.println("\t@Override");
-			lclBW.println("\tpublic Class<?>[] getFieldTypes() { return ourFieldTypes; }");
+			lclBW.println("\tpublic final Class<?>[] getFieldTypes() { return getStaticFieldTypes(); }");
 			lclBW.println();
 			lclBW.println("\tpublic static boolean[] getStaticFieldNullability() { return ourFieldNullability; }");
 			lclBW.println();
 			lclBW.println("\t@Override");
-			lclBW.println("\tpublic " + FieldValidator.class.getName() + "[] getFieldValidators() { return ourFieldValidators; }");
-			lclBW.println();
-			lclBW.println("\t@Override");
-			lclBW.println("\tpublic boolean[] getFieldNullability() { return ourFieldNullability; }");
+			lclBW.println("\tpublic boolean[] getFieldNullability() { return getStaticFieldNullability(); }");
 			lclBW.println();
 			lclBW.println("\tpublic static " + FieldValidator.class.getName() + "[] getStaticFieldValidators() { return ourFieldValidators; }");
+			lclBW.println();
+			lclBW.println("\t@Override");
+			lclBW.println("\tpublic final " + FieldValidator.class.getName() + "[] getFieldValidators() { return getStaticFieldValidators(); }");
 			lclBW.println();
 			lclBW.println();
 			
@@ -2726,114 +2740,116 @@ public class MappedClass {
 				lclBW.println();
 			}
 			
-			/* Copy old values to new for use when an Opal joins a TransactionContext */
-			
-			lclBW.println("\t@Override");
-			lclBW.println("\tprotected /* synchronized */ void copyOldValuesToNewInternal() {");
-			
-			/* Copy references that this Opal has to other Opals */
-			
-			/* "Standard" references created by having a foreign key to another table. */
-			for (MappedForeignKey lclMFK : getForeignKeysFrom()) {
-				lclBW.println("\t\t" + lclMFK.getNewRoleSourceOpalFieldName() + " = " + lclMFK.getOldRoleSourceOpalFieldName() + ';');
-			}
-			
-			/* Nonstandard references created by another table having a one-to-one foreign key to this table. */
-			
-			for (MappedForeignKey lclMFK : getForeignKeysTo()) {
-				if (lclMFK.representsOneToOneRelationship()) {
-					lclBW.println("\t\t" + lclMFK.getNewRoleTargetOpalFieldName() + " = " + lclMFK.getOldRoleTargetOpalFieldName() + ';');
+			if (isEphemeral() == false) {
+				/* Copy old values to new for use when an Opal joins a TransactionContext */
+				
+				lclBW.println("\t@Override");
+				lclBW.println("\tprotected /* synchronized */ void copyOldValuesToNewInternal() {");
+				
+				/* Copy references that this Opal has to other Opals */
+				
+				/* "Standard" references created by having a foreign key to another table. */
+				for (MappedForeignKey lclMFK : getForeignKeysFrom()) {
+					lclBW.println("\t\t" + lclMFK.getNewRoleSourceOpalFieldName() + " = " + lclMFK.getOldRoleSourceOpalFieldName() + ';');
 				}
-			}
-			
-			/* Collections created by another table having a "normal" (many-to-one) foreign key to this table. */
-			// for (MappedForeignKey lclMFK : getForeignKeysTo()) {
-				// if (lclMFK.representsManyToOneRelationship()) {
-					// if (lclMFK.getForeignKey().getCollectionClass() != null) {
-						// if (lclMFK.getSourceMappedClass().isEphemeral() == false) {
-							// lclBW.println("\t\t" + lclMFK.getNewRoleCollectionMemberName() + " = null; /* Necessary if it has been rolled back */");
-							// lclBW.println("\t\t" + lclMFK.getRoleCachedOperationCollectionMemberName() + " = null; /* Ditto */");
+				
+				/* Nonstandard references created by another table having a one-to-one foreign key to this table. */
+				
+				for (MappedForeignKey lclMFK : getForeignKeysTo()) {
+					if (lclMFK.representsOneToOneRelationship()) {
+						lclBW.println("\t\t" + lclMFK.getNewRoleTargetOpalFieldName() + " = " + lclMFK.getOldRoleTargetOpalFieldName() + ';');
+					}
+				}
+				
+				/* Collections created by another table having a "normal" (many-to-one) foreign key to this table. */
+				// for (MappedForeignKey lclMFK : getForeignKeysTo()) {
+					// if (lclMFK.representsManyToOneRelationship()) {
+						// if (lclMFK.getForeignKey().getCollectionClass() != null) {
+							// if (lclMFK.getSourceMappedClass().isEphemeral() == false) {
+								// lclBW.println("\t\t" + lclMFK.getNewRoleCollectionMemberName() + " = null; /* Necessary if it has been rolled back */");
+								// lclBW.println("\t\t" + lclMFK.getRoleCachedOperationCollectionMemberName() + " = null; /* Ditto */");
+							// }
 						// }
 					// }
 				// }
-			// }
-			
-			/* Copy collections that this Opal has of other Opals */
-			
-			lclBW.println("\t\t/* We don't copy Collections of other Opals; they will be cloned as needed. */");
-			
-			lclBW.println("\t\treturn;");
-			lclBW.println("\t}");
-			lclBW.println();
-			
-			/* copyNewValuesToOldInternal is invoked upon a successful commit operation to copy the 
-			 * updated ("new") values to the shared, "old" fields. */
-			
-			lclBW.println("\t@Override");
-			/* if (hasAtLeastOneDeprecatedLink()) {
-				lclBW.println("\t@SuppressWarnings(\"deprecation\")");
-			} */
-			lclBW.println("\tprotected /* synchronized */ void copyNewValuesToOldInternal() {");
-			
-			/* Copy references that this Opal has to other Opals */
-			
-			for (MappedForeignKey lclMFK : getForeignKeysFrom()) {
-				lclBW.println("\t\t" + lclMFK.getOldRoleSourceOpalFieldName() + " = " + lclMFK.getNewRoleSourceOpalFieldName() + ';');
-			}
-			
-			if (getForeignKeyCount() > 0) {
+				
+				/* Copy collections that this Opal has of other Opals */
+				
+				lclBW.println("\t\t/* We don't copy Collections of other Opals; they will be cloned as needed. */");
+				
+				lclBW.println("\t\treturn;");
+				lclBW.println("\t}");
 				lclBW.println();
-			} else {
-				lclBW.println("\t\t/** This Opal has no references to other Opals that need to be copied. */");
-			}
-			
-			/* References that this Opal has to other Opals by virtue of a one-to-one (unique) foreign key originating on
-			 * the other table.  In this case the target class also has a field (rather than a Collection).
-			 */
-			for (MappedForeignKey lclMFK : getForeignKeysTo()) {
-				if (lclMFK.representsOneToOneRelationship()) {
-					lclBW.println("\t\t" + lclMFK.getOldRoleTargetOpalFieldName() + " = " + lclMFK.getNewRoleTargetOpalFieldName() + ';');
+				
+				/* copyNewValuesToOldInternal is invoked upon a successful commit operation to copy the 
+				 * updated ("new") values to the shared, "old" fields. */
+				
+				lclBW.println("\t@Override");
+				/* if (hasAtLeastOneDeprecatedLink()) {
+					lclBW.println("\t@SuppressWarnings(\"deprecation\")");
+				} */
+				lclBW.println("\tprotected /* synchronized */ void copyNewValuesToOldInternal() {");
+				
+				/* Copy references that this Opal has to other Opals */
+				
+				for (MappedForeignKey lclMFK : getForeignKeysFrom()) {
+					lclBW.println("\t\t" + lclMFK.getOldRoleSourceOpalFieldName() + " = " + lclMFK.getNewRoleSourceOpalFieldName() + ';');
 				}
-			}
-			
-			/* Copy collections that this Opal has of other Opals */
-			/* if (hasAtLeastOneBackCollection()) {
-				lclBW.println("\t\tif (needsToClearOldCollections()) {");
+				
+				if (getForeignKeyCount() > 0) {
+					lclBW.println();
+				} else {
+					lclBW.println("\t\t/** This Opal has no references to other Opals that need to be copied. */");
+				}
+				
+				/* References that this Opal has to other Opals by virtue of a one-to-one (unique) foreign key originating on
+				 * the other table.  In this case the target class also has a field (rather than a Collection).
+				 */
 				for (MappedForeignKey lclMFK : getForeignKeysTo()) {
-					if (lclMFK.representsManyToOneRelationship()) {
-						if (lclMFK.getCollectionType() != null) {
-							if (lclMFK.getSourceMappedClass().isEphemeral() == false) {
-								lclBW.println("\t\t\t" + lclMFK.getOldRoleCollectionMemberName() + " = null;");
+					if (lclMFK.representsOneToOneRelationship()) {
+						lclBW.println("\t\t" + lclMFK.getOldRoleTargetOpalFieldName() + " = " + lclMFK.getNewRoleTargetOpalFieldName() + ';');
+					}
+				}
+				
+				/* Copy collections that this Opal has of other Opals */
+				/* if (hasAtLeastOneBackCollection()) {
+					lclBW.println("\t\tif (needsToClearOldCollections()) {");
+					for (MappedForeignKey lclMFK : getForeignKeysTo()) {
+						if (lclMFK.representsManyToOneRelationship()) {
+							if (lclMFK.getCollectionType() != null) {
+								if (lclMFK.getSourceMappedClass().isEphemeral() == false) {
+									lclBW.println("\t\t\t" + lclMFK.getOldRoleCollectionMemberName() + " = null;");
+								}
 							}
 						}
 					}
-				}
-				lclBW.println("\t\t} else {");
-				for (MappedForeignKey lclMFK : getForeignKeysTo()) {
-					if (lclMFK.representsManyToOneRelationship()) {
-						if (lclMFK.getCollectionType() != null) {
-							if (lclMFK.getSourceMappedClass().isEphemeral() == false) {
-								lclBW.println("\t\t\tif (" + lclMFK.getNewRoleCollectionMemberName() + " != null) {");
-								lclBW.println("\t\t\t\tif (" + lclMFK.getNewRoleCollectionMemberName() + ".size() > 0) {");
-								lclBW.println("\t\t\t\t\t" + lclMFK.getOldRoleCollectionMemberName() + " = " + lclMFK.getNewRoleCollectionMemberName() + ';');
-								lclBW.println("\t\t\t\t} else {");
-								lclBW.println("\t\t\t\t\t" + lclMFK.getOldRoleCollectionMemberName() + " = " + Collections.class.getName() + ".emptySet();");
-								lclBW.println("\t\t\t\t}");
-								lclBW.println("\t\t\t\t" + lclMFK.getNewRoleCollectionMemberName() + " = null;");
-								lclBW.println("\t\t\t} else {");
-								lclBW.println("\t\t\t\t" + lclMFK.getRoleCachedOperationCollectionMemberName() + " = null;");
-								lclBW.println("\t\t\t}");
+					lclBW.println("\t\t} else {");
+					for (MappedForeignKey lclMFK : getForeignKeysTo()) {
+						if (lclMFK.representsManyToOneRelationship()) {
+							if (lclMFK.getCollectionType() != null) {
+								if (lclMFK.getSourceMappedClass().isEphemeral() == false) {
+									lclBW.println("\t\t\tif (" + lclMFK.getNewRoleCollectionMemberName() + " != null) {");
+									lclBW.println("\t\t\t\tif (" + lclMFK.getNewRoleCollectionMemberName() + ".size() > 0) {");
+									lclBW.println("\t\t\t\t\t" + lclMFK.getOldRoleCollectionMemberName() + " = " + lclMFK.getNewRoleCollectionMemberName() + ';');
+									lclBW.println("\t\t\t\t} else {");
+									lclBW.println("\t\t\t\t\t" + lclMFK.getOldRoleCollectionMemberName() + " = " + Collections.class.getName() + ".emptySet();");
+									lclBW.println("\t\t\t\t}");
+									lclBW.println("\t\t\t\t" + lclMFK.getNewRoleCollectionMemberName() + " = null;");
+									lclBW.println("\t\t\t} else {");
+									lclBW.println("\t\t\t\t" + lclMFK.getRoleCachedOperationCollectionMemberName() + " = null;");
+									lclBW.println("\t\t\t}");
+								}
 							}
 						}
 					}
-				}
-				lclBW.println("\t\t}");
-				lclBW.println("\t\tsetClearOldCollections(false);");
-			} */
-			
-			lclBW.println("\t\treturn;");
-			lclBW.println("\t}");
-			lclBW.println();
+					lclBW.println("\t\t}");
+					lclBW.println("\t\tsetClearOldCollections(false);");
+				} */
+				
+				lclBW.println("\t\treturn;");
+				lclBW.println("\t}");
+				lclBW.println();
+			}
 			
 			if (lclSuperClass == UpdatableOpal.class) {
 				/* TODO: Convert this generated code to use the new foreach construct.  This will require an accessor for the
@@ -2906,89 +2922,91 @@ public class MappedClass {
 				lclBW.println();
 			}
 			
-			if (lclSuperClass == UpdatableOpal.class) {
-				lclBW.println("\t@Override");
-				lclBW.println("\tprotected void copyFieldsToInternal(" + UpdatableOpal.class.getName() + '<' + lclICN + "> argTarget) {");
-				StringBuilder lclSB = new StringBuilder(1024);
-				boolean lclAtLeastOneFieldToCopy = false;
-				
-				lclCMI = createClassMemberIterator();
-				OuterLoop: while (lclCMI.hasNext()) {
-					ClassMember lclCM = lclCMI.next();
-					if (lclCM.isMapped() == false) {
-						continue OuterLoop;
-					}
-					int lclFI = lclCM.getFieldIndex();
-					if (lclCM.getDatabaseColumn().hasDatabaseGeneratedNumber()) {
-						lclSB.append("\t\t/* Field " + lclFI + " (" + lclCM.getBaseMemberName() + ") is database generated. */" + System.lineSeparator());
-						continue OuterLoop;
-					}
-					for (MappedUniqueKey lclMUK : getMappedUniqueKeys()) {
-						if (lclMUK.getClassMembers().contains(lclCM)) {
-							lclSB.append("\t\t/* Field " + lclFI + " (" + lclCM.getBaseMemberName() + ") is part of a unique key. */" + System.lineSeparator());
+			if (isEphemeral() == false) {
+				if (lclSuperClass == UpdatableOpal.class) {
+					lclBW.println("\t@Override");
+					lclBW.println("\tprotected void copyFieldsToInternal(" + UpdatableOpal.class.getName() + '<' + lclICN + "> argTarget) {");
+					StringBuilder lclSB = new StringBuilder(1024);
+					boolean lclAtLeastOneFieldToCopy = false;
+					
+					lclCMI = createClassMemberIterator();
+					OuterLoop: while (lclCMI.hasNext()) {
+						ClassMember lclCM = lclCMI.next();
+						if (lclCM.isMapped() == false) {
 							continue OuterLoop;
 						}
-					}
-					if (lclCM.getMemberType() == Timestamp.class) {
-						if (lclCM.hasDefault()) {
-							lclSB.append("\t\t/* Field " + lclFI + " (" + lclCM.getBaseMemberName() + ") is a date with a default, so we don't copy it. */" + System.lineSeparator());
-						} else {
-							lclAtLeastOneFieldToCopy = true;
-							if (lclCM.isNullAllowed()) {
-								lclSB.append("\t\tif (lclValues[" + lclFI + "] == null) {\n");
-								lclSB.append("\t\t\tlclTargetNewValues[" + lclFI + "] = null;\n");
-								lclSB.append("\t\t} else {\n");
-								lclSB.append("\t\t\t");
-							} else {
-								lclSB.append("\t\t");
-							}
-							lclSB.append("lclTargetNewValues[" + lclFI + "] = new " + Timestamp.class.getName() + "(((" + Timestamp.class.getName() + ") lclValues[" + lclFI + "]).getTime()); /* " + lclCM.getBaseMemberName() + " (mutable) */" + System.lineSeparator());
-							if (lclCM.isNullAllowed()) {
-								lclSB.append("\t\t}\n");
+						int lclFI = lclCM.getFieldIndex();
+						if (lclCM.getDatabaseColumn().hasDatabaseGeneratedNumber()) {
+							lclSB.append("\t\t/* Field " + lclFI + " (" + lclCM.getBaseMemberName() + ") is database generated. */" + System.lineSeparator());
+							continue OuterLoop;
+						}
+						for (MappedUniqueKey lclMUK : getMappedUniqueKeys()) {
+							if (lclMUK.getClassMembers().contains(lclCM)) {
+								lclSB.append("\t\t/* Field " + lclFI + " (" + lclCM.getBaseMemberName() + ") is part of a unique key. */" + System.lineSeparator());
+								continue OuterLoop;
 							}
 						}
-					} else {
-						/* Assume the field is immutable.  FIXME: We should probably make an explicit list of types here, just so we 
-						 * don't get boned by some expecting type in the future.
-						 */
-						lclAtLeastOneFieldToCopy = true;
-						lclSB.append("\t\tlclTargetNewValues[" + lclFI + "] = lclValues[" + lclFI + "]; /* " + lclCM.getBaseMemberName() + " (immutable) */" + System.lineSeparator());
+						if (lclCM.getMemberType() == Timestamp.class) {
+							if (lclCM.hasDefault()) {
+								lclSB.append("\t\t/* Field " + lclFI + " (" + lclCM.getBaseMemberName() + ") is a date with a default, so we don't copy it. */" + System.lineSeparator());
+							} else {
+								lclAtLeastOneFieldToCopy = true;
+								if (lclCM.isNullAllowed()) {
+									lclSB.append("\t\tif (lclValues[" + lclFI + "] == null) {\n");
+									lclSB.append("\t\t\tlclTargetNewValues[" + lclFI + "] = null;\n");
+									lclSB.append("\t\t} else {\n");
+									lclSB.append("\t\t\t");
+								} else {
+									lclSB.append("\t\t");
+								}
+								lclSB.append("lclTargetNewValues[" + lclFI + "] = new " + Timestamp.class.getName() + "(((" + Timestamp.class.getName() + ") lclValues[" + lclFI + "]).getTime()); /* " + lclCM.getBaseMemberName() + " (mutable) */" + System.lineSeparator());
+								if (lclCM.isNullAllowed()) {
+									lclSB.append("\t\t}\n");
+								}
+							}
+						} else {
+							/* Assume the field is immutable.  FIXME: We should probably make an explicit list of types here, just so we 
+							 * don't get boned by some expecting type in the future.
+							 */
+							lclAtLeastOneFieldToCopy = true;
+							lclSB.append("\t\tlclTargetNewValues[" + lclFI + "] = lclValues[" + lclFI + "]; /* " + lclCM.getBaseMemberName() + " (immutable) */" + System.lineSeparator());
+						}
+					}
+					
+					if (lclAtLeastOneFieldToCopy) {
+						lclBW.println("\t\tObject[] lclValues = getReadValueSet();");
+						lclBW.println("\t\tObject[] lclTargetNewValues = argTarget.getNewValues();");
+					}
+					
+					lclBW.println(lclSB.toString());
+					
+					lclBW.println("\t\treturn;");
+					lclBW.println("\t}");
+					lclBW.println();
+				}
+				
+				lclBW.println("\t@Override");
+				if (hasAtLeastOneDeprecatedReference()) {
+					lclBW.println("\t@SuppressWarnings(\"deprecation\")");
+				}
+				lclBW.println("\tpublic synchronized void translateReferencesToFields() {");
+				if (isUpdatable() || isCreatable()) {
+					for (MappedForeignKey lclMFK : getForeignKeysFrom()) {
+						lclBW.println("\t\tif (" + lclMFK.getNewRoleSourceOpalFieldName() + " != " + lclMFK.getTargetOpalClassName() + '.' + NOT_YET_LOADED_STATIC_MEMBER_NAME + ") {");
+						Iterator<ClassMember> lclJ = lclMFK.getSource().iterator();
+						Iterator<ClassMember> lclK = lclMFK.getTarget().iterator();
+						while (lclJ.hasNext()) {
+							ClassMember lclSCM = lclJ.next();
+							ClassMember lclTCM = lclK.next();
+							lclBW.println("\t\t\t" + lclSCM.getObjectMutatorName() + "(" + lclMFK.getNewRoleSourceOpalFieldName() + " == null ? null : " + lclMFK.getNewRoleSourceOpalFieldName() + '.' + lclTCM.getObjectAccessorName() + "());");
+						}
+						lclBW.println("\t\t}");
 					}
 				}
-				
-				if (lclAtLeastOneFieldToCopy) {
-					lclBW.println("\t\tObject[] lclValues = getReadValueSet();");
-					lclBW.println("\t\tObject[] lclTargetNewValues = argTarget.getNewValues();");
-				}
-				
-				lclBW.println(lclSB.toString());
-				
 				lclBW.println("\t\treturn;");
 				lclBW.println("\t}");
 				lclBW.println();
 			}
-			
-			lclBW.println("\t@Override");
-			if (hasAtLeastOneDeprecatedReference()) {
-				lclBW.println("\t@SuppressWarnings(\"deprecation\")");
-			}
-			lclBW.println("\tpublic synchronized void translateReferencesToFields() {");
-			if (isUpdatable() || isCreatable()) {
-				for (MappedForeignKey lclMFK : getForeignKeysFrom()) {
-					lclBW.println("\t\tif (" + lclMFK.getNewRoleSourceOpalFieldName() + " != " + lclMFK.getTargetOpalClassName() + '.' + NOT_YET_LOADED_STATIC_MEMBER_NAME + ") {");
-					Iterator<ClassMember> lclJ = lclMFK.getSource().iterator();
-					Iterator<ClassMember> lclK = lclMFK.getTarget().iterator();
-					while (lclJ.hasNext()) {
-						ClassMember lclSCM = lclJ.next();
-						ClassMember lclTCM = lclK.next();
-						lclBW.println("\t\t\t" + lclSCM.getObjectMutatorName() + "(" + lclMFK.getNewRoleSourceOpalFieldName() + " == null ? null : " + lclMFK.getNewRoleSourceOpalFieldName() + '.' + lclTCM.getObjectAccessorName() + "());");
-					}
-					lclBW.println("\t\t}");
-				}
-			}
-			lclBW.println("\t\treturn;");
-			lclBW.println("\t}");
-			lclBW.println();
 			
 			/* Generate the methods that tell the TransactionContext the relative (partial) order in which Opals (technically, TransactionAwares)
 			 * need to be committed.
@@ -3006,10 +3024,10 @@ public class MappedClass {
 				
 				// .filter(x -> x.getTarget().hasStoreGeneratedClassMember()).
 				List<MappedForeignKey> lclFromKeys = getForeignKeysFrom().stream()
-					.filter(x -> x.getTargetMappedClass().isUpdatableOpal())
-					.sorted()
-					.distinct()
-					.collect(Collectors.toList());
+						.filter(x -> x.getTargetMappedClass().isUpdatableOpal())
+						.sorted()
+						.distinct()
+						.toList();
 				
 				if (lclFromKeys.isEmpty()) {
 					lclBW.println("\t\treturn "+ Collections.class.getName() + ".emptySet();");
@@ -3146,15 +3164,6 @@ public class MappedClass {
 				/* THINK: Do we need to generate some sort of analogous method for use with non-ephemeral opals? */
 			}
 			
-			lclBW.println("\tprivate static int getFieldCountInternal() { return ourFieldNames.length; }");
-			lclBW.println();
-			lclBW.println("\t@Override");
-			lclBW.println("\tprotected int getFieldCount() { return getFieldCountInternal(); }");
-			lclBW.println();
-			lclBW.println("\t@Override");
-			lclBW.println("\tprotected String[] getFieldNames() { return ourFieldNames; }");
-			lclBW.println();
-			
 			for (Class<?> lclOutput : OUTPUT_CLASSES) {
 				lclBW.println("\t@Override");
 				lclBW.println("\tpublic synchronized void output(final " + lclOutput.getName() + " argOutput) {");
@@ -3198,9 +3207,11 @@ public class MappedClass {
 				
 				/* The new one is null so that new objects do not try lazy evaluation */
 				
-				lclBW.print(lclMFK.sourceMethodDeprecation());
-				lclBW.println("\tprivate " + lclON + ' ' + lclMFK.getNewRoleSourceOpalFieldName() + ';');
-				lclBW.println();
+				if (isEphemeral() == false) {
+					lclBW.print(lclMFK.sourceMethodDeprecation());
+					lclBW.println("\tprivate " + lclON + ' ' + lclMFK.getNewRoleSourceOpalFieldName() + ';');
+					lclBW.println();
+				}
 				
 				lclBW.print(lclMFK.sourceMethodDeprecation());
 				lclBW.println("\tprotected " + lclON + ' ' + lclMFK.getRetrieveOpalMethodName() + "(Object[] argValueSet) {");
@@ -3235,21 +3246,28 @@ public class MappedClass {
 				} */
 				lclBW.println("\tpublic synchronized " + lclON + " get" + lclMFK.getRoleSourceOpalFieldName() + "() {");
 				lclBW.println("\t\t" + lclON + ' ' + lclV + ';');
-				lclBW.println("\t\tboolean lclAccess = tryAccess();");
-				// lclBW.println("\t\tObject[] lclValueSet = getReadValueSet(); /* Unnecessary */");
-				lclBW.println("\t\t" + lclV + " = lclAccess ? " + lclMFK.getNewRoleSourceOpalFieldName() + " : " + lclMFK.getOldRoleSourceOpalFieldName() + ';');
-				lclBW.println("\t\tif (" + lclV + " == " + lclON + '.' + NOT_YET_LOADED_STATIC_MEMBER_NAME + ") {");
-				if (isCreatable() == false && isUpdatable() == false) {
-					lclBW.println("\t\t\t" + lclV + " = retrieve" + lclMFK.getRoleSourceOpalFieldName() +"(getValues());");
+				if (isEphemeral() == false) {
+					lclBW.println("\t\tboolean lclAccess = tryAccess();");
+					lclBW.println("\t\t" + lclV + " = lclAccess ? " + lclMFK.getNewRoleSourceOpalFieldName() + " : " + lclMFK.getOldRoleSourceOpalFieldName() + ';');
+					lclBW.println("\t\tif (" + lclV + " == " + lclON + '.' + NOT_YET_LOADED_STATIC_MEMBER_NAME + ") {");
+					if (isCreatable() == false && isUpdatable() == false) {
+						lclBW.println("\t\t\t" + lclV + " = retrieve" + lclMFK.getRoleSourceOpalFieldName() +"(getValues());");
+					} else {
+						lclBW.println("\t\t\t" + lclV + " = retrieve" + lclMFK.getRoleSourceOpalFieldName() +"(getReadValueSet());");
+					}
+					lclBW.println("\t\t\tif (lclAccess) {");
+					lclBW.println("\t\t\t\t" + lclMFK.getNewRoleSourceOpalFieldName() + " = " + lclV + ';');
+					lclBW.println("\t\t\t} else {");
+					lclBW.println("\t\t\t\t" + lclMFK.getOldRoleSourceOpalFieldName() + " = " + lclV + ';');
+					lclBW.println("\t\t\t}");
+					lclBW.println("\t\t}");
 				} else {
-					lclBW.println("\t\t\t" + lclV + " = retrieve" + lclMFK.getRoleSourceOpalFieldName() +"(getReadValueSet());");
-				}
-				lclBW.println("\t\t\tif (lclAccess) {");
-				lclBW.println("\t\t\t\t" + lclMFK.getNewRoleSourceOpalFieldName() + " = " + lclV + ';');
-				lclBW.println("\t\t\t} else {");
-				lclBW.println("\t\t\t\t" + lclMFK.getOldRoleSourceOpalFieldName() + " = " + lclV + ';');
-				lclBW.println("\t\t\t}");
-				lclBW.println("\t\t}");
+					lclBW.println("\t\t" + lclV + " = " + lclMFK.getOldRoleSourceOpalFieldName() + ';');
+					lclBW.println("\t\tif (" + lclV + " == " + lclON + '.' + NOT_YET_LOADED_STATIC_MEMBER_NAME + ") {");
+					lclBW.println("\t\t\t" + lclV + " = retrieve" + lclMFK.getRoleSourceOpalFieldName() +"(getValues());");
+					lclBW.println("\t\t\t" + lclMFK.getOldRoleSourceOpalFieldName() + " = " + lclV + ';');
+					lclBW.println("\t\t}");
+				}					
 				lclBW.println("\t\treturn " + lclV + ';');
 				lclBW.println("\t}");
 				lclBW.println();

@@ -149,7 +149,7 @@ public abstract class Handle<U extends IdentityUserFacing> implements Serializab
 			@SuppressWarnings("unchecked")
 			OpalBacked<U, Opal<? extends U>> lclOB = (OpalBacked<U, Opal<? extends U>>) argU;
 			
-			Opal<? extends U> lclOpal = lclOB.getBottomOpal();
+			IdentityOpal<? extends U> lclOpal = (IdentityOpal<? extends U>) lclOB.getBottomOpal();
 			
 			/* This OpalFactory's definition is more wildcard-y than it probably has to be, but I can't figure out how
 			 * to get the type parameters exactly right.

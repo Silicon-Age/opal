@@ -2,7 +2,7 @@ package com.opal;
 
 import org.apache.commons.lang3.Validate;
 
-public abstract class UpdatableOpal<U extends IdentityUserFacing> extends IdentityOpal<U> {
+public abstract non-sealed class UpdatableOpal<U extends IdentityUserFacing> extends IdentityOpal<U> {
 
 //	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(UpdatableOpal.class.getName());
 	
