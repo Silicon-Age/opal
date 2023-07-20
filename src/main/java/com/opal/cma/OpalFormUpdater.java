@@ -406,7 +406,7 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 				if (lclPreviousSubmission != null && lclThisFormLoaded <= lclPreviousSubmission.longValue()) { // Equality is a weird situation.  Complaining seems like the safest choice.
 					String lclConflictMessage = getPrefixedParameter("SubmissionConflictMessage");
 					if (lclConflictMessage != null) {
-						addError(lclMessage);
+						addError(lclConflictMessage);
 						return;
 					}
 				} else {
