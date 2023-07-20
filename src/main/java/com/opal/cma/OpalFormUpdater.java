@@ -404,8 +404,11 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 				Long lclPreviousSubmission = OpalFormUpdateTimes.getInstance().get(lclUserFacing); // may be null
 				
 				if (lclPreviousSubmission != null && lclThisFormLoaded <= lclPreviousSubmission.longValue()) { // Equality is a weird situation.  Complaining seems like the safest choice.
-					addError(getPrefixedParameter("SubmissionConflictMessage"));
-					return;
+					String lclConflictMessage = getPrefixedParameter("SubmissionConflictMessage");
+					if (lclConflictMessage != null) {
+						addError(lclMessage);
+						return;
+					}
 				} else {
 					// There is no problem.
 				}
