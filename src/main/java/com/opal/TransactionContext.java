@@ -893,7 +893,7 @@ public class TransactionContext implements AutoCloseable {
 				myItems.size(),
 				mySuccessfulCommitActions.size(),
 				myFailureActions.size(),
-				(myThread != null) ? myThread.getId() : -1,
+				(myThread != null) ? myThread.getName() : "NULL_NAME",
 				myStartCount,
 		};
 	}
