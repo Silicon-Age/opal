@@ -25,8 +25,10 @@ public class OpalParseContext extends ParseContext {
 	private String myDatabaseSubpackage;
 	private String myAuthor;
 	private String myDataSourceJava;
-	private final String myDatabaseUsername; // may be null
-	private final String myDatabasePassword; // may be null
+	
+	private final DBOpts myCLDBOpts;
+//	private final String myDatabaseUsername; // may be null
+//	private final String myDatabasePassword; // may be null
 	
 	private ArrayList<String> myComparatorColumnNameList = new ArrayList<>();
 	private ArrayList<String> myFilterColumnNameList = new ArrayList<>();
@@ -39,16 +41,20 @@ public class OpalParseContext extends ParseContext {
 	/* package */ static final String DEFAULT_POOL_NAME = "Default";
 	private Map<String, String> myPoolMap = new HashMap<>();
 	
-	public OpalParseContext(String argDatabaseUsername, String argDatabasePassword) {
+	public OpalParseContext(DBOpts argCLDBOpts) {
 		super();
-		
-		myDatabaseUsername = argDatabaseUsername; // may be null
-		myDatabasePassword = argDatabasePassword; // may be null
+
+		if (argCLDBOpts == null) {
+			throw new IllegalStateException("argCLDBOpts is null");
+		}
+		myCLDBOpts = argCLDBOpts;
+//		myDatabaseUsername = argDatabaseUsername; // may be null
+//		myDatabasePassword = argDatabasePassword; // may be null
 	}
 	
-	public OpalParseContext() {
-		this(null, null);
-	}
+//	public OpalParseContext() {
+//		this(null, null);
+//	}
 	
 	public String getDefaultPackage() {
 		return myDefaultPackage;
@@ -174,12 +180,18 @@ public class OpalParseContext extends ParseContext {
 		myDataSourceJava = argDataSourceJava;
 	}
 	
-	public String getDatabaseUsername() {
-		return myDatabaseUsername;
+	public DBOpts getCommandLineDBOpts() {
+		return myCLDBOpts;
 	}
 	
+	@Deprecated
+	public String getDatabaseUsername() {
+		return getCommandLineDBOpts().username();
+	}
+	
+	@Deprecated
 	public String getDatabasePassword() {
-		return myDatabasePassword;
+		return getCommandLineDBOpts().password();
 	}
 
 }

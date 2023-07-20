@@ -117,10 +117,10 @@ public abstract class RelationalDatabaseAdapter {
 		MappedClass.ensureDirectoryExists(new File(lclDirectory));
 		
 		String lclOpalFactoryClassFileName = StringUtility.makeFilename(
-			argOPC.getSourceDirectory(),
-			lclSpecificOpalFactoryPackageName,
-			lclSpecificOpalFactoryClassName
-		);
+				argOPC.getSourceDirectory(),
+				lclSpecificOpalFactoryPackageName,
+				lclSpecificOpalFactoryClassName
+				);
 		
 		File lclOpalFactoryClassFile = new File(lclOpalFactoryClassFileName);
 		

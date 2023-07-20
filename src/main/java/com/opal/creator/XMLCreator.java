@@ -3,6 +3,8 @@ package com.opal.creator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,22 +18,41 @@ public class XMLCreator {
 	
 	private final String myFilename;
 	private final String mySourceDirectory;
+
+	/* These member variables store the database configuration information that is passed in via the command-line.  Similar
+	 * data can be provided via the <Database> element in the configuration file, but it is preferred to pass via the
+	 * command-line for security reasons (as the configuration file is often checked into a repository.
+	 * 
+	 * The <Database> element will take priority over anything passed in on the command line.
+	 */
+
+	private final DBOpts myCLDBOpts; // CL = command-line
 	
-	private final String myDatabaseUsername; // may be null
-	private final String myDatabasePassword; // may be null
-	
-	public XMLCreator(String argFilename, String argSourceDirectory, String argDatabaseUsername, String argDatabasePassword) {
+	public XMLCreator(String argFilename,
+			String argSourceDirectory,
+			DBOpts argCLDBOpts) {
+		
 		super();
 		
-		myFilename = Validate.notNull(argFilename);
-		mySourceDirectory = Validate.notNull(argSourceDirectory);
-		myDatabaseUsername = argDatabaseUsername; // may be null
-		myDatabasePassword = argDatabasePassword; // may be null
+		myFilename = Validate.notNull(argFilename, "argFilename is null");
+		mySourceDirectory = Validate.notNull(argSourceDirectory, "argSourceDirectory is null");
+		myCLDBOpts = Validate.notNull(argCLDBOpts, "argCLDBOpts is null");
 	}
 	
-	public XMLCreator(String argFilename, String argSourceDirectory) {
-		this(argFilename, argSourceDirectory, null, null);
-	}
+//	public XMLCreator(String argFilename, String argSourceDirectory) {
+//		this(argFilename,
+//				argSourceDirectory,
+//				new DBOpts(
+//						null,
+//						null,
+//						null,
+////						null,
+////						null,
+//						null,
+//						null
+//						)
+//				);
+//	}
 	
 	protected String getFilename() {
 		return myFilename;
@@ -41,28 +62,81 @@ public class XMLCreator {
 		return mySourceDirectory;
 	}
 	
-	protected String getDatabaseUsername() {
-		return myDatabaseUsername;
+	protected DBOpts getCommandLineDBOpts() {
+		return myCLDBOpts;
 	}
 	
-	protected String getDatabasePassword() {
-		return myDatabasePassword;
+//	protected String getCommandLineDatabaseUsername() {
+//		return myCommandLineDatabaseUsername;
+//	}
+//	
+//	protected String getCommandLineDatabasePassword() {
+//		return myCommandLineDatabasePassword;
+//	}
+	
+	protected static Map<String, String> processCommandLine(String[] argS) {
+		Map<String, String> lclOpts = new HashMap<>();
+		
+		int lclUnnamedCount = 0;
+		if (argS != null) {
+			for (int lclI = 0; lclI < argS.length; ++lclI) {
+				String lclOpt = argS[lclI];
+				if (lclOpt == null) {
+					continue;
+				}
+				lclOpt = lclOpt.trim();
+//				System.out.println("Processing \"" + lclOpt + "\".");
+				final String lclOptName;
+				final String lclOptValue;
+				if ((lclOpt.length() >= 2) && (lclOpt.charAt(0) == '-') && (lclOpt.charAt(1) == '-')) {
+					int lclOptNameStart = 2;
+					int lclOptNameEnd;
+					int lclEquals = lclOpt.indexOf('=', lclOptNameStart);
+					if (lclEquals == -1) {
+						lclOptNameEnd = lclOpt.length();
+					} else {
+						lclOptNameEnd = lclEquals;
+					}
+					lclOptName = lclOpt.substring(lclOptNameStart, lclOptNameEnd);
+					if (lclOptNameEnd < lclOpt.length()) {
+						lclOptValue = lclOpt.substring(lclOptNameEnd + 1);
+					} else {
+						lclOptValue = null;
+					}
+				} else {
+					lclOptName = "unnamed_" + lclUnnamedCount;
+					lclOptValue = lclOpt;
+					++lclUnnamedCount;
+				}
+//				System.out.println("Opt name = " + lclOptName + " value = " + lclOptValue);
+				lclOpts.put(lclOptName, lclOptValue);
+			}
+		}
+		return lclOpts;
 	}
 	
 	public static void main(String[] argS) {
-		Validate.isTrue(argS.length >= 2, "XMLCreator requires two command line arguments: the configuration file and the source directory. After that, you may optionally give the database username, and the database password.");
+
+		Validate.isTrue(argS.length >= 2, "XMLCreator requires at least two command-line arguments: the configuration file and the source directory.  After that, you may optionally give the database username, and the database password.");
+
+		Map<String, String> lclOpts = processCommandLine(argS);
+				
+		String lclFilename = Validate.notNull(lclOpts.get("unnamed_0"), "No configuration file name was provided; it should be the first (non-option) command-line argument");
 		
-		String lclFilename = argS[0];
-		Validate.notNull(lclFilename, "No configuration file name was provided; it should be the first command line argument");
-		
-		String lclSourceDirectory = argS[1];
-		Validate.notNull(lclSourceDirectory, "No source directory was provided; it should be the second command line argument");
-		
-		String lclDatabaseUsername = argS.length > 2 ? argS[2] : null;
-		String lclDatabasePassword = argS.length > 3 ? argS[3] : null;
+		String lclSourceDirectory = Validate.notNull(lclOpts.get("unnamed_1"), "No source directory was provided; it should be the second (non-option) command-line argument");
+
+		DBOpts lclCLDBOpts = new DBOpts( // CL = from the command-line 
+				lclOpts.get("connect-string"), // Any or all of these can be null
+				lclOpts.get("driver-name"),
+				lclOpts.get("jndi-name"),
+//				lclOpts.get("default-database"),
+//				lclOpts.get("default-owner"),
+				lclOpts.get("username"),
+				lclOpts.get("password")
+				);
 		
 		try {
-			XMLCreator lclXMLCreator = new XMLCreator(lclFilename, lclSourceDirectory, lclDatabaseUsername, lclDatabasePassword);
+			XMLCreator lclXMLCreator = new XMLCreator(lclFilename, lclSourceDirectory, lclCLDBOpts);
 			
 			lclXMLCreator.process();
 		} catch (Throwable lclT) {
@@ -84,7 +158,7 @@ public class XMLCreator {
 			
 			Document lclD = lclBuilder.parse(lclFIS);
 			
-			OpalParseContext lclOPC = new OpalParseContext(getDatabaseUsername(), getDatabasePassword());
+			OpalParseContext lclOPC = new OpalParseContext(getCommandLineDBOpts());
 			lclOPC.setElementPackageName("com.opal.creator");
 			lclOPC.setSourceDirectory(getSourceDirectory());
 			
