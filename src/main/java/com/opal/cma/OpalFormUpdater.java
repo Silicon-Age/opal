@@ -888,8 +888,9 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 	 * same package as this class.
 	 */
 	public void addError(String argError) {
-		Validate.notNull(argError);
-		getErrors().add(argError);
+		if (StringUtils.isNotBlank(argError)) {
+			getErrors().add(argError);
+		}
 	}
 	
 	public void addError(String argFieldName, String argError) {
