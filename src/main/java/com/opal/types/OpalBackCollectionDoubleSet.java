@@ -626,6 +626,16 @@ public class OpalBackCollectionDoubleSet<C extends TransactionalOpal<?>, P exten
 		}
 	}
 	
+//	@Override
+//	public boolean isMutated() {
+//		return tryAccess();
+//	}
+//	
+//	@Override
+//	public synchronized boolean isSetLoaded() {
+//		return isLoaded();
+//	}
+	
 	/* FIXME: There's a fundamental problem-in-waiting with the (not very recent) change to this method to display the contents
 	 * of the Collection (loading them if necessary).  Namely, the debugging code in the load() method, among other places,
 	 * calls toString(), so we get infinite recursion when messages are logged (or constructed, in the absence of ifXEnabled()

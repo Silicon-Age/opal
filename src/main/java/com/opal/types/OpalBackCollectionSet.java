@@ -6,4 +6,7 @@ import com.opal.Opal;
 public interface OpalBackCollectionSet<C extends Opal<?>, P extends Opal<?>> extends TransactionAwareSet<C> {
 	public boolean removeInternal(C argC);
 	public boolean addInternal(C argC);
+	
+//	public boolean isMutated();
+//	public boolean isSetLoaded();
 }
