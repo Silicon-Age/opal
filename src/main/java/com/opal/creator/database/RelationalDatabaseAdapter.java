@@ -273,16 +273,13 @@ public abstract class RelationalDatabaseAdapter {
 			lclBW.println("\tprotected com.opal.FieldValidator[] getFieldValidators() { return " + argMC.getOpalClassName() + ".getStaticFieldValidators(); }");
 			lclBW.println();
 						
-//			/* getDataSource */
-//			lclBW.println("\t@Override");
-//			lclBW.println("\tprotected " + DataSource.class.getName() + " getDataSource() {");
-//			lclBW.println("\t\treturn " + getOpalFactoryFactoryClassName() + ".getSpecificInstance().getDataSource();");
-//			lclBW.println("\t}");
-//			lclBW.println();
-			
 			lclBW.println("\t@Override");
 			lclBW.println("\tprotected " + lclOCN + " instantiate(Object[] argValues) {");
-			lclBW.println("\t\treturn new " + lclOCN + "(this, argValues);");
+			if (argMC.isEphemeral() == false) {
+				lclBW.println("\t\treturn new " + lclOCN + "(this, argValues);");
+			} else {
+				lclBW.println("\t\treturn new " + lclOCN + "(argValues);");
+			}
 			lclBW.println("\t}");
 			lclBW.println();
 				
@@ -618,9 +615,6 @@ public abstract class RelationalDatabaseAdapter {
 				for (MappedUniqueKey lclMUK : argMC.getMappedUniqueKeys()) {
 					UniqueKeyType lclT = lclMUK.getType();
 					Validate.isTrue(lclT == UniqueKeyType.UNIQUE || lclT == UniqueKeyType.UNIQUE_IF_ENTIRELY_NOT_NULL);
-//					if (argMC.getTableName().getTableName().equals("Team")) {
-//						System.out.println("Key " + lclMUK + " null component? " + lclMUK.couldHaveNullComponent());
-//					}
 					if (lclT == UniqueKeyType.UNIQUE_IF_ENTIRELY_NOT_NULL && lclMUK.couldHaveNullComponent()) {
 						lclBW.println("\t\t\tif (" + lclMUK.generateNotNullJavaCondition("argValues") + ") {");
 						lclBW.print("\t\t\t\tlclOC.addOpal(new " + lclMUK.getOpalKeyClassName() + "(");
@@ -638,9 +632,6 @@ public abstract class RelationalDatabaseAdapter {
 				lclBW.println();
 				
 				/* unregisterOpal */
-		//		lclBW.println("\tprotected void unregisterOpal(O argOpal) { unregisterOpal(argOpal); }");
-		//		lclBW.println();
-				
 				lclBW.println("\t@Override");
 				lclBW.println("\tprotected void unregisterOpal(" + lclOCN + " argOpal) {");
 				if (argMC.isCreatable() || argMC.isUpdatable()) {
@@ -1087,11 +1078,6 @@ public abstract class RelationalDatabaseAdapter {
 				lclBW.println();
 			}
 			
-	//		lclBW.println("\tpublic " + lclOCN + " getForQuery(Query argQuery) {");
-	//		lclBW.println("\t\treturn (" + lclOCN + ") getOpalForQuery(argQuery);");
-	//		lclBW.println("\t}");
-	//		lclBW.println();
-			
 			/* End of the class */
 			lclBW.println("}");
 			
@@ -1504,11 +1490,6 @@ public abstract class RelationalDatabaseAdapter {
 		try (PrintWriter lclBW = new PrintWriter(new BufferedWriter(new FileWriter(lclOpalClassFile)))) {
 			lclBW.println("package " + lclPackage + ';');
 			lclBW.println();
-//			lclBW.println("import " + DataSource.class.getName() + ';');
-//			lclBW.println("import " + NamingException.class.getName() + ';');
-//			lclBW.println("import " + InitialContext.class.getName() + ';');
-//			lclBW.println();
-//			lclBW.println("import " + PersistenceException.class.getName() + ';');
 			lclBW.println();
 			
 			SortedSet<String> lclFactoryImports = new TreeSet<>();
@@ -1528,10 +1509,6 @@ public abstract class RelationalDatabaseAdapter {
 			lclBW.println();
 			lclBW.println("\tpublic static final " + getOpalFactoryFactoryClassName() + " getSpecificInstance() { return ourInstance; }");
 			lclBW.println();
-//			lclBW.println("\tprivate static final String DATA_SOURCE_NAME=\"" + getDataSourceName() + "\";");
-//			lclBW.println();
-//			lclBW.println("\tprivate DataSource myDataSource;");
-//			lclBW.println();
 			
 			for (MappedClass lclMC : argMappedClasses) {
 				Validate.notNull(lclMC);
@@ -1549,25 +1526,6 @@ public abstract class RelationalDatabaseAdapter {
 				lclBW.println();
 			}
 			
-//			lclBW.println("\tpublic String getDataSourceName() {");
-//			lclBW.println("\t\treturn DATA_SOURCE_NAME;");
-//			lclBW.println("\t}");
-//			lclBW.println();
-//			
-//			lclBW.println("\tpublic synchronized DataSource getDataSource() throws PersistenceException {");
-//			lclBW.println("\t\tif (myDataSource == null) {");
-//			lclBW.println("\t\t\ttry {");
-//			lclBW.println("\t\t\t\tInitialContext lclC = new InitialContext();");
-//			lclBW.println("\t\t\t\tmyDataSource = (DataSource) lclC.lookup(getDataSourceName());");
-//			lclBW.println("\t\t\t\tif (myDataSource == null) {");
-//			lclBW.println("\t\t\t\t\tthrow new IllegalStateException(\"Could not get DataSource from the InitialContext\");");
-//			lclBW.println("\t\t\t\t}");
-//			lclBW.println("\t\t\t} catch (NamingException lclE) {");
-//			lclBW.println("\t\t\t\tthrow new PersistenceException(\"Could not get DataSource\", lclE);");
-//			lclBW.println("\t\t\t}");
-//			lclBW.println("\t\t}");
-//			lclBW.println("\t\treturn myDataSource;");
-//			lclBW.println("\t}");
 			lclBW.println("}");
 		} // autoclose lclBW
 	}
