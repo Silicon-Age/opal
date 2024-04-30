@@ -24,6 +24,7 @@ public class ArgumentTooLongException extends IllegalArgumentException {
 		myPermittedLength = null;
 	}
 	
+	@SuppressWarnings("boxing")
 	public ArgumentTooLongException(int argAttemptedLength, int argPermittedLength) {
 		super();
 		
@@ -35,6 +36,7 @@ public class ArgumentTooLongException extends IllegalArgumentException {
 		myPermittedLength = argPermittedLength;
 	}
 	
+	@SuppressWarnings("boxing")
 	public ArgumentTooLongException(String argMessage, int argAttemptedLength, int argPermittedLength) {
 		super(argMessage);
 		
@@ -58,7 +60,7 @@ public class ArgumentTooLongException extends IllegalArgumentException {
 		if (getAttemptedLength() == null || getPermittedLength() == null) {
 			return null;
 		} else {
-			return getAttemptedLength().intValue() - getPermittedLength().intValue();
+			return Integer.valueOf(getAttemptedLength().intValue() - getPermittedLength().intValue());
 		}
 	}
 }
