@@ -586,6 +586,14 @@ public abstract class AbstractDatabaseIdentityOpalFactory<U extends IdentityUser
 		}
 		for (int lclI = 0; lclI < argParameters.length; ++lclI) {
 			Object lclO = argParameters[lclI];
+			// FIXME: Use pattern-matching on lclO;
+//			argParameters[lclI] = switch (lclO) {
+//			case lclO instanceof LocalDate lclLD -> java.sql.Date.valueOf(lclLD);
+//			case lclO instanceof LocalDateTime lclLDT -> java.sql.Timestamp.valueOf(lclLDT);
+//			case lclO instanceof UTCDateTime lclUDT -> java.sql.Timestamp.valueOf(lclUDT).toLocalDateTime(); // The local time in UTC
+//			case lclO instanceof OffsetDateTime lclODT -> java.sql.Timestamp.valueOf(lclODT).toLocalDateTime();
+//			default -> lclO;
+//			}
 			if (lclO instanceof LocalDate) { // FIXME: It would be nice to get rid of this chain of instanceOfs; what would be faster?
 				argParameters[lclI] = java.sql.Date.valueOf((LocalDate) lclO);
 			} else if (lclO instanceof LocalDateTime) {
@@ -594,8 +602,6 @@ public abstract class AbstractDatabaseIdentityOpalFactory<U extends IdentityUser
 				argParameters[lclI] = java.sql.Timestamp.valueOf(((UTCDateTime) lclO).toLocalDateTime()); // The local time in UTC
 			} else if (lclO instanceof OffsetDateTime) {
 				argParameters[lclI] = java.sql.Timestamp.valueOf(((OffsetDateTime) lclO).toLocalDateTime()); // FIXME: Loses zone data; what do we do?
-			} else if (lclO instanceof LocalDateTime) {
-				argParameters[lclI] = java.sql.Timestamp.valueOf((LocalDateTime) lclO);
 			} else {
 				/* Do nothing */
 			}
@@ -603,6 +609,7 @@ public abstract class AbstractDatabaseIdentityOpalFactory<U extends IdentityUser
 	}
 	
 	protected ResultSet createResultSet(Connection argConnection, Query argQuery) throws SQLException {
+		// FIXME: Use pattern-matching!
 		if (argQuery instanceof ImplicitTableDatabaseQuery) {
 			ImplicitTableDatabaseQuery lclITDQ = (ImplicitTableDatabaseQuery) argQuery;
 			
@@ -610,13 +617,13 @@ public abstract class AbstractDatabaseIdentityOpalFactory<U extends IdentityUser
 			adjustParameters(lclParameters);
 			
 			return DatabaseUtility.select(
-				argConnection,
-				"SELECT " +
-				generateColumnNamesList(getColumnNames()) +
-				" FROM " + getFullyQualifiedTableName() + ' ' +
-				"WHERE " + lclITDQ.getSQL(),
-				lclParameters
-			);
+					argConnection,
+					"SELECT " +
+					generateColumnNamesList(getColumnNames()) +
+					" FROM " + getFullyQualifiedTableName() + ' ' +
+					"WHERE " + lclITDQ.getSQL(),
+					lclParameters
+					);
 		} else if (argQuery instanceof DatabaseQuery) {
 			DatabaseQuery lclDQ = (DatabaseQuery) argQuery;
 			
@@ -624,10 +631,10 @@ public abstract class AbstractDatabaseIdentityOpalFactory<U extends IdentityUser
 			adjustParameters(lclParameters);
 			
 			return DatabaseUtility.select(
-				argConnection,
-				lclDQ.getSQL(),
-				lclDQ.getParameters()
-			);
+					argConnection,
+					lclDQ.getSQL(),
+					lclDQ.getParameters()
+					);
 		} else {
 			throw new IllegalArgumentException("This database-driven OpalFactory only understands DatabaseQuery objects; it was passed a " + argQuery.getClass().getName() + " that stringifies as \"" + argQuery + "\"");
 		}
