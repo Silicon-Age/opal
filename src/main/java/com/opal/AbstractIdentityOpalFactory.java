@@ -155,7 +155,7 @@ public abstract class AbstractIdentityOpalFactory<U extends IdentityUserFacing, 
 		synchronized (lclOC) {
 			O lclCheckOpal = lclOC.forOpalKey(argOK);
 			if (lclCheckOpal != null) {
-				/* Yes.  Somebody else loaded it, so we'll return that cached one and implicit discard the one we were created. */
+				/* Yes.  Somebody else loaded it, so we'll return that cached one and discard the one we created. */
 				lclOpal = lclCheckOpal;
 			} else {
 				/* No.  Nobody else loaded it.  We register its unique keys in the OpalCache. */
