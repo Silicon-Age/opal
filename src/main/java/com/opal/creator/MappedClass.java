@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Stream;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -1033,33 +1032,8 @@ public class MappedClass {
 			
 			/* Create a factory method for each unique key */
 			for (MappedUniqueKey lclMUK : getMappedUniqueKeys()) {
-				/* StringBuilder lclSB = new StringBuilder(32);
-				lclSB.append("for");
 				
-				boolean lclFirst;
-				Iterator<ClassMember> lclCMI;
-				
-				lclCMI = lclMUK.createClassMemberIterator();
-				while (lclCMI.hasNext()) {
-					ClassMember lclCM = lclCMI.next();
-					lclSB.append(lclCM.getBaseMemberName());
-				}
-				
-				String lclFactoryMethodName = lclSB.toString(); */
-				
-				lclBW.print("\tpublic " + getInterfaceClassName() + ' ' + lclMUK.generateFactoryMethodName() + "(");
-				
-				/* boolean lclFirst = true;
-				Iterator<ClassMember> lclCMI = lclMUK.createClassMemberIterator();
-				while (lclCMI.hasNext()) {
-					ClassMember lclCM = lclCMI.next();
-					if (lclFirst) {
-						lclFirst = false;
-					} else {
-						lclBW.print(", ");
-					}
-					lclBW.print(lclCM.getMemberType().getName() + ' ' + lclCM.getPrimitiveMutatorArgumentName());
-				} */
+				lclBW.print("\tpublic " + getInterfaceClassName() + ' ' + lclMUK.generateFactoryMethodName() + "(");				
 				lclBW.print(lclMUK.generateFactoryMethodArguments());
 				lclBW.println(") {");
 				
@@ -1082,6 +1056,22 @@ public class MappedClass {
 				lclBW.println("\t\treturn (" + lclVariable + " == null) ? null : " + lclVariable + ".getUserFacing();");
 				lclBW.println("\t}");
 				lclBW.println();
+				
+				if (lclMUK.getClassMembers().size() == 1) {
+					ClassMember lclCM = lclMUK.getClassMembers().get(0);
+					if (lclCM.getMemberType() == Integer.class) {
+						lclBW.print("\tpublic " + getInterfaceClassName() + ' ' + lclMUK.generateFactoryMethodName() + "(");
+						lclBW.print("int " + lclCM.getPrimitiveMutatorArgumentName());
+						lclBW.println(") {");
+						
+						lclBW.print("\t\treturn " + lclMUK.generateFactoryMethodName() + "(");
+						lclBW.print("Integer.valueOf(" + lclCM.getPrimitiveMutatorArgumentName() + ")");
+						lclBW.println(");");
+						lclBW.println("\t}");
+						lclBW.println();
+					}
+				}
+					
 			}
 			lclBW.println("\t@Override");
 			lclBW.println("\tpublic " + lclICN + "[] createArray(int argSize) {");
@@ -1418,7 +1408,7 @@ public class MappedClass {
 			 * can't implement Supplier (or any generic interface) twice with different type variables.
 			 */
 			for (MappedForeignKey lclMFK : getForeignKeysFrom()) {
-				if (lclMFK.createMatchesPredicate()) { // FIXME: AddSupplierInterface()
+				if (lclMFK.createMatchesPredicate()) {
 					lclBW.print(", " + lclMFK.getTargetMappedClass().getFullyQualifiedUserFacingClassName() + "." + lclMFK.getTargetMappedClass().getSupplierInterfaceName()); // FIXME: Helper method
 				}
 			}
@@ -1882,24 +1872,9 @@ public class MappedClass {
 					continue;
 				}
 				
-//				/* FIXME: For aesthetic reasons, I'd prefer to move this below the "more fundamental" methods dealing with
-//				 * the back collection.
-//				 */
-//				/* FIXME: Output Deprecated? */				
-//				if (lclMFK.createMatchesPredicate()) {
-//					if (("Protected".equalsIgnoreCase(lclMFK.getSourceFieldAccess()) == false) && lclMFK.appearsInSourceUserFacing()) {
-//						lclBW.println("\tdefault boolean matches(" + lclSMC.getFullyQualifiedInterfaceClassName() + " argObject) {");
-//						lclBW.println("\t\treturn argObject != null ? argObject." + lclMFK.getAccessorName() + "() == this : false;");
-//						lclBW.println("\t}");
-//						lclBW.println();
-//					}
-//				}
-				
 				if (lclMFK.hasBackCollection() == false) {
 					continue;
 				}
-				
-//				String lclA = "arg" + lclSMC.getTypeName();
 				
 				if ("Protected".equalsIgnoreCase(lclMFK.getTargetCollectionAccess())) {
 					continue;
@@ -1913,74 +1888,30 @@ public class MappedClass {
 				lclBW.println("\tpublic " + USER_FACING_SET_CLASS.getName() + "<" + lclT + "> " + lclMFK.getRoleCollectionAccessorName() + "();");
 				lclBW.println();
 				
-				/* if (lclSMC.isEphemeral() == false) {
-					lclBW.print(lclDeprecated);
-					lclBW.println("\tdefault int " + lclMFK.getCountMethodName() + "() {");
-					lclBW.println("\t\treturn " + lclMFK.getRoleCollectionAccessorName() + "().size();");
-					lclBW.println("\t}");
-					lclBW.println();
-				} */
-				
-				
-				/* lclBW.print(lclDeprecated);
-				lclBW.println("\tdefault " + USER_FACING_ITERATOR_CLASS.getName() + "<" + lclT + "> " + lclMFK.getIteratorMethodName() + "() {");
-				lclBW.println("\t\treturn " + lclMFK.getRoleCollectionAccessorName() + "().iterator();");
-				lclBW.println("\t}");
-				lclBW.println(); */
-				
 				lclBW.print(lclDeprecated);
 				lclBW.println("\tdefault " + USER_FACING_STREAM_CLASS.getName() + "<" + lclT + "> " + lclMFK.getStreamMethodName() + "() {");
 				lclBW.println("\t\treturn " + lclMFK.getRoleCollectionAccessorName() + "().stream();");
 				lclBW.println("\t}");
 				lclBW.println();
 				
-				// if (lclSMC.isEphemeral() == false) {
-					// lclBW.print(lclDeprecated);
-					// printRequiresActiveTransactionAnnotation(lclBW, 1);
-					// lclBW.println("\tdefault " + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ' ' + lclMFK.getAddMethodName() + "(" + lclT + ' ' + lclA + ") {");
-					// lclBW.println("\t\t" + lclMFK.getRoleCollectionAccessorName() + "().add(" + lclA + ");");
-					// lclBW.println("\t\treturn (" + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ") this;");
-					// lclBW.println("\t}");
-					// lclBW.println();
-					
-					// /* lclBW.print(lclDeprecated);
-					// printRequiresActiveTransactionAnnotation(lclBW, 1);
-					// lclBW.println("\tdefault " + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ' ' + lclMFK.getRemoveMethodName() + "(" + lclT + ' ' + lclA + ") {");
-					// lclBW.println("\t\t" + lclMFK.getRoleCollectionAccessorName() + "().remove(" + lclA + ");");
-					// lclBW.println("\t\treturn (" + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + ") this;");
-					// lclBW.println("\t}");
-					// lclBW.println(); */
-				// }
-				
-				/* lclBW.print(lclDeprecated);
-				lclBW.println("\tdefault <T extends " + ACQUIRE_COLLECTION_INTERFACE.getName() + "<? super " + lclT + ">> T " + lclMFK.getAcquireMethodName() + "(T argC) {");
-				lclBW.println("\t\t" + Validate.class.getName() + ".notNull(argC, \"Target Collection is null\");");
-				lclBW.println("\t\targC.addAll(" + lclMFK.getRoleCollectionAccessorName() + "());");
-				lclBW.println("\t\treturn argC;");
-				lclBW.println("\t}");
-				lclBW.println(); */
 				if (lclSMC.isEphemeral() == false) {
 					lclBW.print(lclDeprecated);
 					lclBW.println("\tdefault " + lclT + "[] " + lclMFK.getArrayMethodName() + "() {");
 					lclBW.println("\t\t" + USER_FACING_SET_CLASS.getName() + "<" + lclT +"> lclS = " + lclMFK.getRoleCollectionAccessorName() + "();");
-					lclBW.println("\t\treturn lclS.toArray(new " + lclT + "[lclS.size()]);");
+					lclBW.println("\t\treturn lclS.toArray(new " + lclT + "[lclS.size()]);"); // Should this be [0]?
 					lclBW.println("\t}");
 					lclBW.println();
 				} else {
 					// TODO: What's up with this?  Why HTTP_...?  Why is this different?
 					lclBW.print(lclDeprecated);
 					lclBW.println("\tdefault " + lclT + "[] " + lclMFK.getArrayMethodName() + "() {");
-					lclBW.println("\t\t" + HTTP_MULTIPLE_INTERMEDIATE_COLLECTION_CLASS.getName() + "<" + lclT + "> lclList = new " + CREATE_ARRAY_INTERMEDIATE_COLLECTION_CLASS.getName() + "<>();");
+					lclBW.println("\t\t" + CREATE_ARRAY_INTERMEDIATE_COLLECTION_CLASS.getName() + "<" + lclT + "> lclList = new " + CREATE_ARRAY_INTERMEDIATE_COLLECTION_CLASS.getName() + "<>();");
 					lclBW.println("\t\t" + lclMFK.getAcquireMethodName() + "(lclList);");
-					lclBW.println("\t\treturn lclList.toArray(new " + lclT + "[lclList.size()]);");
+					lclBW.println("\t\treturn lclList.toArray(new " + lclT + "[lclList.size()]);"); // Should this be [0]?
 					lclBW.println("\t}");
 					lclBW.println();
 				}
 			}
-			
-			/* lclBW.println("\t@Override");
-			lclBW.println("\tpublic void unlink();");
-			lclBW.println(); */
 			
 			if (hasSuperclass() == false) {
 				if (isCreatable()) {
@@ -1988,37 +1919,6 @@ public class MappedClass {
 					lclBW.println();
 				}
 			}
-			
-			/* Create delegated methods, if any */
-			
-			/* for (MethodDelegation lclMD: getMethodDelegations()) {
-				lclBW.print("\tpublic " + OpalUtility.generateJavaDeclaration(lclMD.getReturnType()) + ' ' + lclMD.getLocalMethodName() + "(");
-				Type[] lclParameters = lclMD.getParameters();
-				if (lclParameters != null) {
-					for (int lclI = 0; lclI < lclParameters.length; ++lclI) {
-						if (lclI > 0) {
-							lclBW.print(", ");
-						}
-						lclBW.print(OpalUtility.generateJavaDeclaration(lclParameters[lclI]));
-						lclBW.print(' ');
-						lclBW.print("arg");
-						lclBW.print((char) ('A' + lclI));
-					}
-				}
-				lclBW.print(")");
-				Type[] lclExceptions = lclMD.getExceptions();
-				if (lclExceptions != null && lclExceptions.length > 0) {
-					lclBW.print(" throws ");
-					for (int lclI = 0; lclI < lclExceptions.length; ++lclI) {
-						if (lclI > 0) {
-							lclBW.print(", ");
-						}
-						lclBW.print(OpalUtility.generateJavaDeclaration(lclExceptions[lclI]));
-					}
-				}
-				lclBW.println(';');
-				lclBW.println();
-			} */
 			
 			// TODO: Copy annotations
 			for (MethodDelegation lclMD : getMethodDelegations()) {
@@ -2064,6 +1964,71 @@ public class MappedClass {
 				lclBW.println();
 			}
 			
+			/* Generate find methods.  If Opal B has foreign keys to Opals A and C such that the union of those foreign keys' columns
+			 * cover one of B's unique keys, the we add a method to A like B findB(C) and a method to C like B findB(A).
+			 * 
+			 * We require that both of B's foreign keys to unprefixed (to avoid problems with generating duplicate methods),
+			 * but there's no theoretical reason to do that.  We'll need (or least want) role-prefixed (or -suffixed) matches
+			 * methods to implement it, though.  We also require that at least one of the foreign keys have a back collection.
+			 * 
+			 * The current implementation just streams one of the back collections looking for a match.  In theory, this could
+			 * be greatly optimized by using a Factory lookup (if key values haven't changed) and/or checking to see which
+			 * back collection might already be loaded.
+			 * 
+			 * It would be logical to do this in the earlier loop over getForeignKeysTo(), but that loop bails early in the
+			 * absence of a back collection.  However, we will want to create a find method if the second key opal has a 
+			 * back collection (even if this one doesn't).
+			 */
+			final HashSet<MappedClass> lclSecondKeysAlreadyUsed = new HashSet<>(); 
+			
+			for (MappedForeignKey lclMFK1 : getForeignKeysTo()) {
+				if (lclMFK1.representsManyToOneRelationship() && (lclMFK1.getSourceRolePrefix().equals(""))) {
+					lclSecondKeysAlreadyUsed.clear();
+					MappedClass lclMiddleMC = lclMFK1.getSourceMappedClass();
+//					System.out.println("Checking for a find method in " + this.getTypeName() + " for " + lclMiddleMC.getTypeName() + ".");
+					for (MappedUniqueKey lclMUK : lclMiddleMC.getMappedUniqueKeys()) {
+//						if (lclMUK.isMapped()) {
+//							System.out.println("Checking the mapped key with key class " + lclMUK.getOpalKeyClassName() + ".");
+							for (MappedForeignKey lclMFK2 : lclMiddleMC.getForeignKeysFrom()) {
+								if ((lclMFK1 != lclMFK2) && lclMFK2.representsManyToOneRelationship() && (lclMFK2.getSourceRolePrefix().equals(""))) {
+									if ((lclMFK1.hasBackCollection() == false) && (lclMFK2.hasBackCollection() == false)) {
+										continue;
+									}
+									MappedClass lclSecondKeyMC = lclMFK2.getTargetMappedClass();
+									if (lclSecondKeysAlreadyUsed.contains(lclSecondKeyMC)) {
+										continue;
+									}
+//									System.out.println("Checking the second key " + lclSecondKeyMC.getTypeName() + ".");
+									boolean lclEligible = true;
+									for (ClassMember lclCM : lclMUK.getClassMembers()) {
+										if ((lclMFK1.getSource().contains(lclCM) == false) && (lclMFK2.getSource().contains(lclCM) == false)) {
+//											System.out.println("The column " + lclCM.getBaseMemberName() + " caused it to fail.");
+											lclEligible = false;
+										}
+									}
+									if (lclEligible) {
+//										System.out.println("We can create a find method for this combination.");
+										lclSecondKeysAlreadyUsed.add(lclSecondKeyMC);
+										lclBW.println("\tdefault " + lclMiddleMC.getFullyQualifiedInterfaceClassName() + " find" + lclMiddleMC.getInterfaceClassName() + "(" + lclSecondKeyMC.getFullyQualifiedInterfaceClassName() + " argK) {");
+										lclBW.println("\t\tif (argK == null) { return null; }");
+										if (lclMFK2.hasBackCollection()) {
+											lclBW.println("\t\treturn argK." + lclMFK2.getStreamMethodName() + "().filter(this::matches).findAny().orElse(null);");
+										} else {
+											lclBW.println("\t\treturn this." + lclMFK1.getStreamMethodName() + "().filter(argK::matches).findAny().orElse(null);");
+										}
+										lclBW.println("\t}");
+										lclBW.println();										
+									}
+								}
+							}
+//						}
+					}
+				}
+			}
+			
+			/* Create single-field Comparators for fields that were either marked with Comparator="True" or that have a name
+			 * that matches the list of column names that get Comparators by default (e.g., "sequence").
+			 */
 			for (ClassMember lclCM : getClassMembers()) {
 				if (lclCM.isComparator()) {
 					String lclFQICN = getFullyQualifiedInterfaceClassName();
@@ -2270,9 +2235,9 @@ public class MappedClass {
 				}
 			}
 			lclBW.print("public final class " + lclOCN + " extends " + lclSuperClassName + "<" + lclICN + ">");
-			if (isEphemeral() /* && hasPublicFields */) {
-				lclBW.print(" implements " + com.opal.PublicFields.class.getName());
-			}
+//			if (isEphemeral() /* && hasPublicFields */) {
+//				lclBW.print(" implements " + com.opal.PublicFields.class.getName());
+//			}
 			lclBW.println(" {");
 			
 			lclBW.println();
@@ -2302,8 +2267,12 @@ public class MappedClass {
 				lclBW.println("\t}");
 				lclBW.println();
 			}
-			
-			lclBW.println("\tpublic " + getOpalClassName() + "(" + lclOpalFactoryClass.getName() + '<' + lclICN + ", " + lclOCN + "> argOpalFactory, Object[] argValues) {");
+			if (isEphemeral() == false) {
+				lclBW.println("\tpublic " + getOpalClassName() + "(" + lclOpalFactoryClass.getName() + '<' + lclICN + ", " + lclOCN + "> argOpalFactory, Object[] argValues) {");
+			} else {
+//				lclBW.println("\tpublic " + getOpalClassName() + "(@SuppressWarnings(\"unused\") " + lclOpalFactoryClass.getName() + '<' + lclICN + ", " + lclOCN + "> argOpalFactory, Object[] argValues) {");
+				lclBW.println("\tpublic " + getOpalClassName() + "(Object[] argValues) {");
+			}				
 			if (isEphemeral() == false) {
 				lclBW.println("\t\tsuper(argOpalFactory, argValues);");
 			} else {
