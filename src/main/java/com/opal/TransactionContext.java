@@ -95,6 +95,7 @@ public class TransactionContext implements AutoCloseable {
 		}
 	}
 	
+	@SuppressWarnings("resource")
 	public void add(TransactionAware argItem) {
 		Validate.notNull(argItem);
 		if (lockOrThrow()) {
