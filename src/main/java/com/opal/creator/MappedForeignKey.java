@@ -30,7 +30,6 @@ public class MappedForeignKey implements Comparable<MappedForeignKey> {
 	
 	private String mySourceRolePrefix;
 	private String myTargetRolePrefix;
-//	private String myCustomCollectionName; // null = use default
 	
 	private String myDeterminedRoleCollectionItemName; // null until correct value is cached
 	private String myDeterminedRoleCollectionName; // null until correct value is cached
@@ -313,11 +312,11 @@ public class MappedForeignKey implements Comparable<MappedForeignKey> {
 	}
 	
 	public String getRoleOpalCollectionAccessorName() {
-		return "get" + getRoleOpalCollectionName();
+		return ACCESSOR_PREFIX + getRoleOpalCollectionName();
 	}
 	
 	public String getRoleCollectionAccessorName() {
-		return "get" + getRoleCollectionName();
+		return ACCESSOR_PREFIX + getRoleCollectionName();
 	}
 	
 	public String getSourceRolePrefix() {
@@ -498,25 +497,7 @@ public class MappedForeignKey implements Comparable<MappedForeignKey> {
 			return lclS;
 		}
 		return getRoleCollectionItemName() + DEFAULT_OPAL_COLLECTION_SUFFIX;
-//		lclS = getCustomCollectionItemName();
-//		if (lclS != null) {
-//			return lclS + DEFAULT_OPAL_COLLECTION_SUFFIX; // THINK: Should we prependTargetRole?  Or assume that the user can manually specify it if he or she wants it?			
-//		}
-//		return prependTargetRole(getSourceMappedClass().getTypeName()) + DEFAULT_OPAL_COLLECTION_SUFFIX;
 	}
-	
-//	/* This is the base name of the "back collection" that will appear on the target class of this
-//	 * Foreign Key. 
-//	 */
-//	public String getBaseCollectionName() {
-//		Validate.isTrue(representsManyToOneRelationship());
-//		Validate.notNull(getCollectionType(), "Cannot ask for base name when there is no back collection.");
-//		return getDefaultCollectionContentsName() + "Collection";
-//	}
-	
-//	public String getRoleCollectionName() {
-//		return prependTargetRole(getBaseCollectionName());
-//	}
 	
 	public CompoundClassMember getSource() {
 		return mySource;
@@ -709,16 +690,8 @@ public class MappedForeignKey implements Comparable<MappedForeignKey> {
 	}
 	
 	public String generateSourceFactoryFunctionCall() {
-//		System.out.println("===");
-		
 		StringBuilder lclSB = new StringBuilder(128);
 		lclSB.append(getTarget().generateCollectionFactoryFunctionName());
-//		lclSB.append("for");
-//		Iterator<ClassMember> lclCMI = getTarget().createClassMembersIterator();
-//		while (lclCMI.hasNext()) {
-//			ClassMember lclCM = lclCMI.next();
-//			lclSB.append(lclCM.getBaseMemberName());
-//		}
 		/* Now add the parameters */
 		lclSB.append('(');
 		Iterator<ClassMember> lclCMI = getSource().iterator();
@@ -740,12 +713,6 @@ public class MappedForeignKey implements Comparable<MappedForeignKey> {
 	public String generateTargetFactoryFunctionCall() {
 		StringBuilder lclSB = new StringBuilder(128);
 		lclSB.append(getSource().generateCollectionFactoryFunctionName());
-//		lclSB.append("for");
-//		Iterator<ClassMember> lclI = getSource().createClassMembersIterator();
-//		while (lclI.hasNext()) {
-//			ClassMember lclCM = lclI.next();
-//			lclSB.append(lclCM.getBaseMemberName());
-//		}
 		lclSB.append('(');
 		Iterator<ClassMember> lclCMI = getTarget().iterator();
 		boolean lclFirst = true;
@@ -907,10 +874,19 @@ public class MappedForeignKey implements Comparable<MappedForeignKey> {
 		return getDependents().isEmpty() == false;
 	}
 	
+	public boolean shouldSourceExtendSupplierInterface() { // FIXME: Make this configurable // FIXME: New name?
+		return ("Protected".equalsIgnoreCase(getSourceFieldAccess()) == false)
+				&& appearsInSourceUserFacing()
+				&& "".equals(getSourceRolePrefix())
+//				&& getForeignKey().getSpecifiedBaseName() == null
+				;
+	}
+
 	public boolean createMatchesPredicate() { // FIXME: Make this configurable // FIXME: New name?
-		return ("Protected".equalsIgnoreCase(getSourceFieldAccess()) == false) &&
-				appearsInSourceUserFacing() &&
-				"".equals(getSourceRolePrefix());
+		return ("Protected".equalsIgnoreCase(getSourceFieldAccess()) == false)
+				&& appearsInSourceUserFacing()
+				&& "".equals(getSourceRolePrefix())
+				;
 	}
 
 	public ReferentialAction getDeleteAction() {
