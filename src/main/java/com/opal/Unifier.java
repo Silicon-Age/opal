@@ -215,9 +215,9 @@ public class Unifier<U extends IdentityUserFacing> {
 		int lclGoodIntValue = lclGoodValue == null ? argValueForNulls : lclGoodValue.intValue();
 		
 		long lclBadSum = getBads().stream()
-			.map(argBad -> (Integer) argBad.getField(argFieldName))
-			.mapToInt(argValue -> argValue == null ? argValueForNulls : argValue.intValue())
-			.sum();
+				.map(argBad -> (Integer) argBad.getField(argFieldName))
+				.mapToInt(argValue -> argValue == null ? argValueForNulls : argValue.intValue())
+				.sum();
 		
 		long lclSumGoodAndBad = lclBadSum + lclGoodIntValue;
 		
@@ -227,7 +227,7 @@ public class Unifier<U extends IdentityUserFacing> {
 			lclSum = (int) lclSumGoodAndBad;
 		}
 		
-		getGood().setField(argFieldName, lclSum);
+		getGood().setField(argFieldName, Integer.valueOf(lclSum));
 		
 		return this;
 	}
@@ -245,11 +245,11 @@ public class Unifier<U extends IdentityUserFacing> {
 		long lclGoodPrimitiveValue = lclGoodValue == null ? argValueForNulls : lclGoodValue.longValue();
 		
 		long lclBadSum = getBads().stream()
-			.map(argBad -> (Long) argBad.getField(argFieldName))
-			.mapToLong(argValue -> argValue == null ? argValueForNulls : argValue.longValue())
-			.sum();
+				.map(argBad -> (Long) argBad.getField(argFieldName))
+				.mapToLong(argValue -> argValue == null ? argValueForNulls : argValue.longValue())
+				.sum();
 		
-		getGood().setField(argFieldName, lclGoodPrimitiveValue + lclBadSum);
+		getGood().setField(argFieldName, Long.valueOf(lclGoodPrimitiveValue + lclBadSum));
 		
 		return this;
 	}
@@ -267,11 +267,11 @@ public class Unifier<U extends IdentityUserFacing> {
 		double lclGoodPrimitiveValue = lclGoodValue == null ? argValueForNulls : lclGoodValue.doubleValue();
 		
 		double lclBadSum = getBads().stream()
-			.map(argBad -> (Double) argBad.getField(argFieldName))
-			.mapToDouble(argValue -> argValue == null ? argValueForNulls : argValue.doubleValue())
-			.sum();
+				.map(argBad -> (Double) argBad.getField(argFieldName))
+				.mapToDouble(argValue -> argValue == null ? argValueForNulls : argValue.doubleValue())
+				.sum();
 		
-		getGood().setField(argFieldName, lclGoodPrimitiveValue + lclBadSum);
+		getGood().setField(argFieldName, Double.valueOf(lclGoodPrimitiveValue + lclBadSum));
 		
 		return this;
 	}
@@ -285,11 +285,11 @@ public class Unifier<U extends IdentityUserFacing> {
 		float lclGoodPrimitiveValue = lclGoodValue == null ? argValueForNulls : lclGoodValue.floatValue();
 		
 		float lclBadSum = (float) getBads().stream() // FIXME: risk of overflow
-			.map(argBad -> (Float) argBad.getField(argFieldName))
-			.mapToDouble(argValue -> argValue == null ? argValueForNulls : argValue.doubleValue())
-			.sum();
+				.map(argBad -> (Float) argBad.getField(argFieldName))
+				.mapToDouble(argValue -> argValue == null ? argValueForNulls : argValue.doubleValue()) // There is no mapToFloat
+				.sum();
 		
-		getGood().setField(argFieldName, lclGoodPrimitiveValue + lclBadSum);
+		getGood().setField(argFieldName, Float.valueOf(lclGoodPrimitiveValue + lclBadSum));
 		
 		return this;
 	}
@@ -309,12 +309,12 @@ public class Unifier<U extends IdentityUserFacing> {
 		int lclGoodPrimitiveValue = lclGoodValue == null ? argDefault : lclGoodValue.intValue();
 		
 		int lclMaxOfBads = getBads().stream()
-			.map(argBad -> (Integer) argBad.getField(argFieldName))
-			.mapToInt(argValue -> argValue == null ? argDefault : argValue.intValue())
-			.max()
-			.orElse(lclGoodPrimitiveValue);
+				.map(argBad -> (Integer) argBad.getField(argFieldName))
+				.mapToInt(argValue -> argValue == null ? argDefault : argValue.intValue())
+				.max()
+				.orElse(lclGoodPrimitiveValue);
 		
-		getGood().setField(argFieldName, Math.max(lclMaxOfBads, lclGoodPrimitiveValue));
+		getGood().setField(argFieldName, Integer.valueOf(Math.max(lclMaxOfBads, lclGoodPrimitiveValue)));
 		
 		return this;
 	}
@@ -335,7 +335,7 @@ public class Unifier<U extends IdentityUserFacing> {
 			.max()
 			.orElse(lclGoodPrimitiveValue);
 		
-		getGood().setField(argFieldName, Math.max(lclMaxOfBads, lclGoodPrimitiveValue));
+		getGood().setField(argFieldName, Long.valueOf(Math.max(lclMaxOfBads, lclGoodPrimitiveValue)));
 		
 		return this;
 	}
@@ -356,7 +356,7 @@ public class Unifier<U extends IdentityUserFacing> {
 			.max()
 			.orElse(lclGoodPrimitiveValue);
 		
-		getGood().setField(argFieldName, Math.max(lclMaxOfBads, lclGoodPrimitiveValue));
+		getGood().setField(argFieldName, Double.valueOf(Math.max(lclMaxOfBads, lclGoodPrimitiveValue)));
 		
 		return this;
 	}
@@ -364,7 +364,7 @@ public class Unifier<U extends IdentityUserFacing> {
 	public Unifier<U> and(String argFieldName) {
 		Validate.notEmpty(argFieldName);
 		
-		Validate.isTrue(getGood().getFieldType(argFieldName) == Boolean.class, "Cannot perform 'or' on non-Boolean fields");
+		Validate.isTrue(getGood().getFieldType(argFieldName) == Boolean.class, "Cannot perform 'and' on non-Boolean fields");
 		
 		Collection<U> lclBads = getBads();
 		int lclCount = 1 + lclBads.size();
