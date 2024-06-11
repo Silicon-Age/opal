@@ -94,13 +94,13 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 	
 	public static <U extends IdentityUserFacing> OpalMainForm<U> create(HttpSession argSession, HttpServletRequest argRequest, String argFormAction, U argUserFacing, IdentityFactory<U> argFactory) {
 		return create(
-			argSession,
-			argRequest,
-			argFormAction,
-			argUserFacing,
-			argFactory,
-			OpalMainForm.DEFAULT_UNIQUE_STRING_PARAMETER_NAME
-		);
+				argSession,
+				argRequest,
+				argFormAction,
+				argUserFacing,
+				argFactory,
+				OpalMainForm.DEFAULT_UNIQUE_STRING_PARAMETER_NAME
+				);
 	}
 	
 	public static <U extends IdentityUserFacing> OpalMainForm<U> create(HttpSession argSession, HttpServletRequest argRequest, String argFormAction, U argUserFacing, IdentityFactory<U> argFactory, String argParameterName) {
@@ -171,9 +171,9 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 	
 	protected String generateIdentifyingFields() {
 		return generateUserFacingFactoryField().toString() +
-			generateUserFacingUniqueStringField() +
-			generateValidatorField() +
-			generateUpdaterField();
+				generateUserFacingUniqueStringField() +
+				generateValidatorField() +
+				generateUpdaterField();
 	}
 	
 	protected FormField<?, ?> generateUserFacingFactoryField() {
@@ -450,20 +450,6 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 		}
 	}
 	
-//	protected boolean isChecked(String argName) {
-//		if (getEnteredValue(argName) == null) {
-//			Boolean lclSavedValue = (Boolean) getSavedValue(argName);
-//			
-//			if (lclSavedValue == null) {
-//				return false;
-//			} else {
-//				return lclSavedValue.booleanValue();
-//			}
-//		} else {
-//			return this.isChecked(generateFullyQualifiedName(argName), HTMLUtility.DEFAULT_TRUE_STRING);
-//		}
-//	}
-	
 	public OpalCheckboxField<?> checkbox(String argName) {
 		Validate.notNull(argName);
 		
@@ -476,7 +462,7 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 			lclChecked = Boolean.FALSE;
 		}
 
-		return new OpalCheckboxField<>(generateFullyQualifiedName(argName), lclChecked, this);
+		return new OpalCheckboxField<>(generateFullyQualifiedName(argName), lclChecked.booleanValue(), this);
 	}
 	
 	protected OpalCheckboxField<?> checkbox(String argName, String argValue) {
@@ -489,7 +475,7 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 			lclChecked = Boolean.FALSE;
 		}
 
-		return checkbox(argName, argValue, lclChecked);
+		return checkbox(argName, argValue, lclChecked.booleanValue());
 	}
 	
 	protected OpalCheckboxField<?> checkbox(String argName, String argValue, boolean argChecked) {
@@ -778,7 +764,6 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 			// Make sure all children are being handled
 			for (var lclChildDefinition : FieldUtility.getChildNamesAndTypes(getFactory().getUserFacingInterface())) {
 				String lclChildName = lclChildDefinition.getLeft();
-				
 				Set<?> lclChildren = FieldUtility.getChildren(getUserFacing(), lclChildName);
 				if (lclChildren.isEmpty() == false && handlesDeletionFor(lclChildName) == false) {
 					return false;
@@ -949,8 +934,8 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 		}
 		
 		argField.dataAttribute("opal-form-prefix", getPrefix())
-			.dataAttribute("opal-form-isnew", String.valueOf(this.isNew()))
-			.dataAttribute("opal-form-type", this.getClass().getSimpleName());
+				.dataAttribute("opal-form-isnew", String.valueOf(this.isNew()))
+				.dataAttribute("opal-form-type", this.getClass().getSimpleName());
 		
 		return argField;
 	}
