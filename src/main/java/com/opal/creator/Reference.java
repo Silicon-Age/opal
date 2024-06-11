@@ -30,7 +30,7 @@ public class Reference extends OpalXMLElement {
 	protected void preChildren(OpalParseContext argContext) throws Exception {
 		String lclName = getAttributeValue("Name", "UNNAMED_REFERENCE");
 		
-		boolean lclMapped = Boolean.valueOf(getAttributeValue("Mapped", "True"));
+		boolean lclMapped = Boolean.parseBoolean(getAttributeValue("Mapped", "True"));
 		if (lclMapped == false) {
 			ourLogger.warn("Doing an artificial foreign key for which Mapped is false!");
 		}
@@ -132,7 +132,7 @@ public class Reference extends OpalXMLElement {
 		 */
 		
 		String lclOneToOneString = XMLElement.getAttributeValue(lclTarget, "OneToOne");
-		boolean lclOneToOne = Boolean.valueOf(lclOneToOneString);
+		boolean lclOneToOne = Boolean.parseBoolean(lclOneToOneString);
 
 		if (lclOneToOne) {
 			lclSourceMappedClass.complain(MessageLevel.Info, "Foreign key is manually marked as representing a one-to-one relationship.");
