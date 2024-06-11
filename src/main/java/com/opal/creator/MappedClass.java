@@ -1408,7 +1408,7 @@ public class MappedClass {
 			 * can't implement Supplier (or any generic interface) twice with different type variables.
 			 */
 			for (MappedForeignKey lclMFK : getForeignKeysFrom()) {
-				if (lclMFK.createMatchesPredicate()) {
+				if (lclMFK.shouldSourceExtendSupplierInterface()) {
 					lclBW.print(", " + lclMFK.getTargetMappedClass().getFullyQualifiedUserFacingClassName() + "." + lclMFK.getTargetMappedClass().getSupplierInterfaceName()); // FIXME: Helper method
 				}
 			}
@@ -1798,8 +1798,23 @@ public class MappedClass {
 					lclBW.println("\t@Deprecated");
 				}
 				lclBW.println("\t@" + Nullability.class.getName() + "(nullable = " + (!lclMFK.isRequired()) + ")");
-				lclBW.println("\tpublic " + lclT + " get" + lclMFK.getRoleSourceFieldName() + "();");
+				lclBW.println("\tpublic " + lclT + " " + lclMFK.getAccessorName() + "();");
 				
+				if (lclMFK.shouldSourceExtendSupplierInterface()) {
+					// We know the MFK role must be blank at this point.
+					if (lclMFK.getForeignKey().getSpecifiedBaseName() != null) {
+						if (lclMFK.getTargetMappedClass().isDeprecated() && isDeprecated() == false) {
+							lclBW.println("\t@Deprecated");
+						}
+						lclBW.println("\t@" + Nullability.class.getName() + "(nullable = " + (!lclMFK.isRequired()) + ")");
+						lclBW.println("\tdefault " + lclT + " get" + lclMFK.getDefaultSourceFieldName() + "() {"); // Role is blank.
+						lclBW.println("\t\treturn " + lclMFK.getAccessorName() + "();");
+						lclBW.println("\t}");
+						lclBW.println();
+					}
+				}
+				
+				/* Create the mutator */
 				if (isCreatable() || isUpdatable()) {
 					if (lclMFK.getTargetMappedClass().isDeprecated() && isDeprecated() == false) {
 						lclBW.println("\t@Deprecated");
@@ -1807,7 +1822,7 @@ public class MappedClass {
 					
 					printRequiresActiveTransactionAnnotation(lclBW, 1);
 					
-					lclBW.println("\tpublic " + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + " set" + lclMFK.getRoleSourceFieldName() + "(" + lclT + ' ' + lclA + ");");
+					lclBW.println("\tpublic " + determineMutatorReturnType(getFullyQualifiedInterfaceClassName()) + " " + lclMFK.getMutatorName() + "(" + lclT + ' ' + lclA + ");");
 					lclBW.println();
 				}
 			}
