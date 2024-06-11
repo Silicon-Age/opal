@@ -175,7 +175,7 @@ public abstract class OpalRestlet<U extends IdentityUserFacing, A> extends HttpS
 			throw new RestResultException(RestResult.badRequest("Invalid integer null"));
 		}
 		try {
-			return Integer.valueOf(argS);
+			return Integer.parseInt(argS);
 		} catch (NumberFormatException lclE) {
 			throw new RestResultException(RestResult.badRequest("Invalid integer \"" + argS + "\""));
 		}
