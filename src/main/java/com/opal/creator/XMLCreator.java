@@ -180,7 +180,7 @@ public class XMLCreator {
 	
 	protected static void complain(MessageLevel argML, MappedClass argMC, String argMessage) {
 		if (argML == null) {
-			complain(MessageLevel.Error, argMC, "Message generated with no MessageLevel (\"" + argMessage + "\")"); 
+			complain(MessageLevel.Error, argMC, "complain() called with null MessageLevel (argMessage = \"" + argMessage + "\")"); 
 		} else {
 			MessageLevel argThreshold = MessageLevel.Warning;
 			if (argMC != null) {
