@@ -74,6 +74,8 @@ public class Database extends OpalXMLElement {
 			argContext.setRelationalDatabaseAdapter(new OracleAdapter(lclDataSource));
 		} else if (lclUrl.startsWith("jdbc:microsoft:")) {
 			argContext.setRelationalDatabaseAdapter(new SQLServerAdapter(lclDataSource));
+		} else if (lclUrl.startsWith("jdbc:sqlserver:")) {
+			argContext.setRelationalDatabaseAdapter(new SQLServerAdapter(lclDataSource));
 		} else if (lclUrl.startsWith("jdbc:jtds:")) {
 			argContext.setRelationalDatabaseAdapter(new SQLServerAdapter(lclDataSource));
 		} else if (lclUrl.startsWith("jdbc:sybase:")) {
