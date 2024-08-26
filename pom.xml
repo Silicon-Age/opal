@@ -12,15 +12,40 @@
 	<version>1.1.0</version>
 	
 	<properties>
-		<maven.compiler.source>19</maven.compiler.source>
-		<maven.compiler.target>19</maven.compiler.target>
-		<maven.compiler.release>19</maven.compiler.release>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.release>21</maven.compiler.release>
 	</properties>
 	
 	<repositories>
+		<!-- jitpack.io is a service that compiles GitHub projects into artifacts (based on tagged releases)
+		"on the fly" so they can be referenced by Maven (and maybe Gradle).  In the medium term, we may return
+		to using this for the siliconage artifact, but we are not currently.
+		-->
+		<!--
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
+		</repository>
+		-->
+		
+		<!-- Instead, the siliconage-{version}.jar needs to be put in a special local directory.  That turns
+		out to be:
+		
+		{$project.basedir}/lib/rrh/siliconage/${version}
+		
+		For instance, for me, that is actually
+		
+		/media/mirror/home/topquarkj/opal/lib/rrh/siliconage/1.1.0/siliconage-1.1.0.jar
+		
+		Note that the "rrh" comes from the groupId in the <dependency> element; it was basically chosen out of a
+		need to put something there.
+		
+		Note also that this file URL supplised for this <repository> is just a prefix of the above path.
+		-->
+		<repository>
+			<id>local-jars</id>
+			<url>file://${project.basedir}/lib</url>
 		</repository>
 	</repositories>
 	
@@ -69,10 +94,21 @@
 		</dependency>
 		
 		<!-- Fetched through jitpack -->
+		<!--
 		<dependency>
 			<groupId>com.github.Silicon-Age</groupId>
 			<artifactId>siliconage</artifactId>
 			<version>1.0.1</version>
+		</dependency>
+		-->
+
+		<!-- This dependency (siliconage.jar) is loaded from the local file system rather than a central repository
+		or a just-in-time artifact-maker like jitpack.  The build will not work until jar has been manually
+		copied into the correct place.  See the local-jars <repository> element above for more information. -->
+		<dependency>
+			<groupId>rrh</groupId> <!-- Placeholder; we have to put something.  This becomes a subdirectory. -->
+			<artifactId>siliconage</artifactId> <!-- Another subdirectory -->
+			<version>1.1.0</version> <!-- A final subdirectory. -->
 		</dependency>
 	</dependencies>
 </project>
