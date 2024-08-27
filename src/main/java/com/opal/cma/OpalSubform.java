@@ -92,7 +92,7 @@ public class OpalSubform<U extends IdentityUserFacing> extends OpalForm<U> {
 	@Override
 	public String close() {
 		setClosed();
-		getParent().outputUponClose(generateHiddenIndicatorsOfDisplayedFields());
+		getParent().outputUponClose(generateHiddenIndicatorsOfEnabledDisplayedFields());
 		
 		return "";
 	}
