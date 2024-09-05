@@ -1797,12 +1797,17 @@ public class MappedClass {
 				if (lclMFK.getTargetMappedClass().isDeprecated() && isDeprecated() == false) {
 					lclBW.println("\t@Deprecated");
 				}
+				if (lclMFK.shouldSourceExtendSupplierInterface() && lclMFK.getForeignKey().getSpecifiedBaseName() == null) {
+					lclBW.println("\t@Override");
+				}
 				lclBW.println("\t@" + Nullability.class.getName() + "(nullable = " + (!lclMFK.isRequired()) + ")");
 				lclBW.println("\tpublic " + lclT + " " + lclMFK.getAccessorName() + "();");
+				lclBW.println();
 				
 				if (lclMFK.shouldSourceExtendSupplierInterface()) {
 					// We know the MFK role must be blank at this point.
 					if (lclMFK.getForeignKey().getSpecifiedBaseName() != null) {
+						lclBW.println("\t@Override");
 						if (lclMFK.getTargetMappedClass().isDeprecated() && isDeprecated() == false) {
 							lclBW.println("\t@Deprecated");
 						}
