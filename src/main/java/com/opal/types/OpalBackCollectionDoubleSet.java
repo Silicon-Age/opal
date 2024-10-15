@@ -22,7 +22,7 @@ import com.siliconage.util.Fast3Set;
 /* C = child opal (contained in the Set), P = parent opal (owner of the Set) */
 public class OpalBackCollectionDoubleSet<C extends TransactionalOpal<?>, P extends TransactionalOpal<?>> extends AbstractOpalBackCollectionSet<C, P> {
 	
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalBackCollectionDoubleSet.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalBackCollectionDoubleSet.class.getName());
 	
 	private static final Set<?> SENTINEL_OLD_SET_FOR_NEW_COLLECTIONS = new Fast3Set<>();
 	

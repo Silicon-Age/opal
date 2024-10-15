@@ -54,7 +54,7 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 	private final Set<String> myIncorrectFields = new Fast3Set<>();
 	private final Set<Pair<String, String>> myCheckedNameValuePairs = new Fast3Set<>();
 
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalFormUpdater.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalFormUpdater.class.getName());
 	
 	/* Used for the root (i.e., argPrefix == "") updater with a Validator */
 	public OpalFormUpdater(HttpServletRequest argRequest, String argPrefix, String argParameterName, Validator<U> argValidator) {

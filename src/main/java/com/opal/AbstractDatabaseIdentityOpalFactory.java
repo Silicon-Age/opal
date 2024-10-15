@@ -34,7 +34,7 @@ import com.siliconage.util.UnimplementedOperationException;
  */
 
 public abstract class AbstractDatabaseIdentityOpalFactory<U extends IdentityUserFacing, O extends IdentityOpal<U>> extends AbstractIdentityOpalFactory<U, O> {
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(AbstractDatabaseIdentityOpalFactory.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(AbstractDatabaseIdentityOpalFactory.class.getName());
 	
 	protected AbstractDatabaseIdentityOpalFactory() {
 		super();

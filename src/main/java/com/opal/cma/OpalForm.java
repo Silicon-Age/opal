@@ -65,7 +65,7 @@ import com.opal.OpalUtility;
 public abstract class OpalForm<U extends IdentityUserFacing> implements FormValueProvider {
 	/* package */ static final String FULLY_QUALIFIED_NAME_SEPARATOR = "/";
 	
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalForm.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalForm.class.getName());
 	
 	protected static final String FACTORY_CLASS_NAME_FORM_PARAMETER_SUFFIX = "_FACTORY_CLASS_NAME";
 	

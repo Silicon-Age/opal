@@ -5,7 +5,7 @@ import org.w3c.dom.Node;
 
 public class Mappings extends OpalXMLElement {
 	
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(Mappings.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(Mappings.class.getName());
 
 //	private static final String DEFAULT_FACTORY_MAP_CLASS_NAME = "FactoryMap";
 	

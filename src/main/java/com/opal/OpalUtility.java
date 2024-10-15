@@ -28,7 +28,7 @@ import com.opal.types.UTCDateTime;
 import com.siliconage.util.Trinary;
 
 public abstract class OpalUtility {
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalUtility.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalUtility.class.getName());
 	
 	private static final String SQL_TIMESTAMP_FORMAT_NANOS = "yyyy-MM-dd HH:mm:ss.SSSSSSS"; // Actually, hundreds of nanos
 	private static final DateTimeFormatter SQL_TIMESTAMP_FORMATTER_NANOS = DateTimeFormatter.ofPattern(SQL_TIMESTAMP_FORMAT_NANOS);

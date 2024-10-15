@@ -17,7 +17,7 @@ import com.opal.IdentityFactory;
 import com.opal.IdentityUserFacing;
 
 public class OpalSubform<U extends IdentityUserFacing> extends OpalForm<U> {
-	// private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalSubform.class.getName());
+	// private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalSubform.class.getName());
 	
 	private final OpalForm<?> myParent;
 	

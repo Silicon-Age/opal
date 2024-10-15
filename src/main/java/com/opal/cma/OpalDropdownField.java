@@ -22,7 +22,7 @@ import com.opal.IdentityUserFacing;
 import com.opal.ImplicitTableDatabaseQuery;
 
 public class OpalDropdownField<T extends OpalDropdownField<?, U>, U extends IdentityUserFacing> extends AssembledDropdownField<T, U> {
-	// private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalDropdownField.class.getName());
+	// private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalDropdownField.class.getName());
 	
 	private IdentityFactory<U> myFactory;
 	private DatabaseQuery myQuery;

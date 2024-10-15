@@ -6,7 +6,7 @@ import org.w3c.dom.Node;
 
 public class Subpackage extends OpalXMLElement {
 	
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(Subpackage.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(Subpackage.class.getName());
 
 	public Subpackage(OpalXMLElement argParent, Node argNode) {
 		super(argParent, argNode);

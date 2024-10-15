@@ -132,7 +132,7 @@ public abstract class Handle<U extends IdentityUserFacing> implements Serializab
 	private static class FactoryBasedHandle<U extends IdentityUserFacing> extends Handle<U> {
 		private static final long serialVersionUID = 1L;
 		
-		private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(FactoryBasedHandle.class.getName());
+		private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(FactoryBasedHandle.class.getName());
 		
 		private final String myUniqueString;
 		private final String myFactoryName;

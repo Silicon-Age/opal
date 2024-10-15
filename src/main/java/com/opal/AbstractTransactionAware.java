@@ -12,8 +12,7 @@ import org.apache.commons.lang3.Validate;
 import static com.opal.CommitStep.*;
 
 public abstract class AbstractTransactionAware implements TransactionAware /* implements Serializable */ {
-	
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(AbstractTransactionAware.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(AbstractTransactionAware.class.getName());
 	
 	private static final int TRY_MUTATE_TIMEOUT = 60 * 1000; // 60 seconds
 	

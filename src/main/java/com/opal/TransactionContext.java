@@ -13,10 +13,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.sql.DataSource;
 
-// import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import com.siliconage.util.Fast3Set;
 
@@ -30,8 +30,7 @@ import static com.opal.CommitStep.STARTED_PHASE_ONE;
 import static com.opal.CommitStep.STARTED_PHASE_TWO;
 
 public class TransactionContext implements AutoCloseable {
-
-	private static final Logger ourLogger = Logger.getLogger(TransactionContext.class.getName());
+	private static final Logger ourLogger = LoggerFactory.getLogger(TransactionContext.class.getName());
 
 	private static final ThreadLocal<TransactionContext> ourActiveTransactionContexts = new ThreadLocal<>();
 	
@@ -177,7 +176,7 @@ public class TransactionContext implements AutoCloseable {
 		
 		Map<TransactionAware, Set<TransactionAware>> lclLinks = new IdentityHashMap<>((int) (argTAs.size() / 0.75)); // We really need a Multimap here, but Guava isn't a dependency
 		
-		final boolean lclLogging = ourLogger.isEnabledFor(getLoggingLevel());
+		final boolean lclLogging = ourLogger.isEnabledForLevel(getLoggingLevel());
 		
 		for (TransactionAware lclTA : argTAs) {
 			Validate.notNull(lclTA, "Null TransactionAware");
@@ -187,7 +186,7 @@ public class TransactionContext implements AutoCloseable {
 				throw new IllegalStateException("Null RequiredPriorCommits for " + lclTA);
 			}
 			if (lclLogging) {
-				ourLogger.log(getLoggingLevel(), lclTA + " has " + lclRequiredPriorCommits.size() + " required prior commits.");
+				ourLogger.atLevel(getLoggingLevel()).log(lclTA + " has " + lclRequiredPriorCommits.size() + " required prior commits.");
 			}
 			lclLinks.put(lclTA, lclRequiredPriorCommits);
 		}
@@ -198,7 +197,7 @@ public class TransactionContext implements AutoCloseable {
 				throw new IllegalStateException("Null subsequent commits for " + lclTA);
 			}
 			if (lclLogging) {
-				ourLogger.log(getLoggingLevel(), lclTA + " has " + lclAfters.size() + " required subsequent commits.");
+				ourLogger.atLevel(getLoggingLevel()).log(lclTA + " has " + lclAfters.size() + " required subsequent commits.");
 			}
 			for (TransactionAware lclTA2 : lclAfters) {
 				Set<TransactionAware> lclTAs = lclLinks.get(lclTA2);
@@ -245,7 +244,7 @@ public class TransactionContext implements AutoCloseable {
 					throw new IllegalStateException("Null Set of TransactionAwares returned for " + lclTA2 + lclTA2Newness + ", which is a subsequent commit for " + lclTA + lclTANewness + ".");
 				}
 				if (lclLogging) {
-					ourLogger.log(getLoggingLevel(), "Of those required subsequent commits, " + lclTA2 + " has " + lclTAs.size() + " required prior commits.");
+					ourLogger.atLevel(getLoggingLevel()).log("Of those required subsequent commits, " + lclTA2 + " has " + lclTAs.size() + " required prior commits.");
 				}
 				if (lclTAs.isEmpty()) {
 					lclTAs = new Fast3Set<>();
@@ -253,14 +252,14 @@ public class TransactionContext implements AutoCloseable {
 				}
 				lclTAs.add(lclTA);
 				if (lclLogging) {
-					ourLogger.log(getLoggingLevel(), lclTA2 + " now has " + lclTAs.size() + " required prior commits.");
+					ourLogger.atLevel(getLoggingLevel()).log(lclTA2 + " now has " + lclTAs.size() + " required prior commits.");
 				}
 			}
 		}
 		
 		if (lclLogging) {
 			for (Map.Entry<TransactionAware, Set<TransactionAware>> lclEntry : lclLinks.entrySet()) {
-				ourLogger.log(getLoggingLevel(), lclEntry.getKey() + " -> " + lclEntry.getValue().size());
+				ourLogger.atLevel(getLoggingLevel()).log(lclEntry.getKey() + " -> " + lclEntry.getValue().size());
 			}
 		}
 		
@@ -274,7 +273,7 @@ public class TransactionContext implements AutoCloseable {
 		while (lclI < lclTAs.length) {
 			TransactionAware lclTA = lclTAs[lclI];
 			if (lclLogging) {
-				ourLogger.log(getLoggingLevel(), "lclI = " + lclI + " lclTA = " + lclTA);
+				ourLogger.atLevel(getLoggingLevel()).log("lclI = " + lclI + " lclTA = " + lclTA);
 			}
 			if (lclLinks.containsKey(lclTA) == false) {
 				++lclI;
@@ -288,7 +287,7 @@ public class TransactionContext implements AutoCloseable {
 				while (lclTAI.hasNext()) {
 					TransactionAware lclTA3 = lclTAI.next();
 					if (lclLogging) {
-						ourLogger.log(getLoggingLevel(), "Checking on " + lclTA3);
+						ourLogger.atLevel(getLoggingLevel()).log("Checking on " + lclTA3);
 					}
 					lclS = lclLinks.get(lclTA3);
 					if (lclS == null) {
@@ -299,7 +298,7 @@ public class TransactionContext implements AutoCloseable {
 				}
 				if (lclTA2 != null) {
 					if (lclLogging) {
-						ourLogger.log(getLoggingLevel(), "lclTA2 is " + lclTA2 + " lclS.size = " + (lclS != null ? lclS.size() : -1));
+						ourLogger.atLevel(getLoggingLevel()).log("lclTA2 is " + lclTA2 + " lclS.size = " + (lclS != null ? lclS.size() : -1));
 					}
 					lclTA = lclTA2;
 					// lclS has already been set
@@ -308,7 +307,7 @@ public class TransactionContext implements AutoCloseable {
 				}
 			}
 			if (lclLogging) {
-				ourLogger.log(getLoggingLevel(), "Commit slot " + lclPOI + " is " + lclTA);
+				ourLogger.atLevel(getLoggingLevel()).log("Commit slot " + lclPOI + " is " + lclTA);
 			}
 			lclProperlyOrderedArray[lclPOI++] = lclTA;
 			lclS = lclLinks.remove(lclTA);
@@ -316,9 +315,9 @@ public class TransactionContext implements AutoCloseable {
 		}
 
 		if (lclLogging) {
-			ourLogger.log(getLoggingLevel(), "Commit ordering:");
+			ourLogger.atLevel(getLoggingLevel()).log("Commit ordering:");
 			for (lclI = 0; lclI < lclProperlyOrderedArray.length; ++lclI) {
-				ourLogger.log(getLoggingLevel(), lclI + ". " + lclProperlyOrderedArray[lclI]);
+				ourLogger.atLevel(getLoggingLevel()).log(lclI + ". " + lclProperlyOrderedArray[lclI]);
 			}
 		}
 		
@@ -336,7 +335,7 @@ public class TransactionContext implements AutoCloseable {
 					throw new IllegalStateException("Tried to complete() " + this + " but it has a start count of 0; that is, every operation that was started appears to already have been completed.");
 				}
 				
-				ourLogger.log(getLoggingLevel(), "Completing " + this + "; start count = " + getStartCount());
+				ourLogger.atLevel(getLoggingLevel()).log("Completing " + this + "; start count = " + getStartCount());
 				if (getStartCount() == 1) {
 					commit();
 				}
@@ -354,7 +353,7 @@ public class TransactionContext implements AutoCloseable {
 			try {
 				Validate.isTrue(getCommitStep() == NOT_CURRENTLY_COMMITTING);
 				
-				ourLogger.log(getLoggingLevel(), "Committing " + this);
+				ourLogger.atLevel(getLoggingLevel()).log("Committing " + this);
 				
 				if (getItems().isEmpty()) {
 					/* No opals have been changed as part of this transaction so there's nothing to do */
@@ -508,7 +507,7 @@ public class TransactionContext implements AutoCloseable {
 						setCommitStep(COMMITTED);
 					}
 					
-					ourLogger.log(getLoggingLevel(), "Finished committing " + this);
+					ourLogger.atLevel(getLoggingLevel()).log("Finished committing " + this);
 					
 					if (getCommitStep() == COMMITTED) {
 						for (Runnable lclR : getSuccessfulCommitActions()) {
@@ -560,7 +559,7 @@ public class TransactionContext implements AutoCloseable {
 	
 	private final void setCommitStep(CommitStep argCommitStep) {
 		ensureLock(); // Ultimately, this call can be removed.
-		// ourLogger.log(getLoggingLevel(), "Changing CommitStep for " + this + " from " + myCommitStep + " to " + argCommitStep);
+		// ourLogger.atLevel(getLoggingLevel()).log("Changing CommitStep for " + this + " from " + myCommitStep + " to " + argCommitStep);
 		myCommitStep = argCommitStep;
 	}
 	
@@ -638,7 +637,7 @@ public class TransactionContext implements AutoCloseable {
 				
 				try {
 					setCommitStep(ROLLING_BACK);
-					ourLogger.log(getLoggingLevel(), "Rolling back " + this);
+					ourLogger.atLevel(getLoggingLevel()).log("Rolling back " + this);
 					
 					Iterator<TransactionAware> lclI = getItems().iterator();
 					
@@ -648,7 +647,7 @@ public class TransactionContext implements AutoCloseable {
 							if (lclItem != null) {
 								/* TODO: Should we check for a specific status on the Opal to make sure things are functioning properly? */ 
 								
-								// ourLogger.log(getLoggingLevel(), "Rolling back changes to " + lclO.toDebugString());
+								// ourLogger.atLevel(getLoggingLevel()).log("Rolling back changes to " + lclO.toDebugString());
 								
 								synchronized (lclItem) {
 									lclItem.rollback();
@@ -675,7 +674,7 @@ public class TransactionContext implements AutoCloseable {
 					if (getActive() == this) {
 						setActive(null);
 					}
-					// ourLogger.log(getLoggingLevel(), "In the finally block for rolling back " + this);
+					// ourLogger.atLevel(getLoggingLevel()).log("In the finally block for rolling back " + this);
 				}
 			} finally {
 				getLock().unlock();
@@ -702,7 +701,7 @@ public class TransactionContext implements AutoCloseable {
 					}
 					return;
 				}
-				ourLogger.log(getLoggingLevel(), "Closing " + this + "; start count = " + getStartCount());
+				ourLogger.atLevel(getLoggingLevel()).log("Closing " + this + "; start count = " + getStartCount());
 				if (getStartCount() == 1) {
 					rollback();
 					zeroStartCount();
@@ -842,7 +841,7 @@ public class TransactionContext implements AutoCloseable {
 	}
 	
 	private static void setActive(TransactionContext argTC) {
-		// ourLogger.log(getLoggingLevel(), "Setting active TC to " + String.valueOf(argTC));
+		// ourLogger.atLevel(getLoggingLevel()).log("Setting active TC to " + String.valueOf(argTC));
 		
 //		synchronized (ourActiveTransactionContexts) { // THINK: Does one really have to synchronize on a ThreadLocal?
 			final TransactionContext lclTC = ourActiveTransactionContexts.get();
@@ -873,7 +872,7 @@ public class TransactionContext implements AutoCloseable {
 				}
 			}
 //		}
-		// ourLogger.log(getLoggingLevel(), "Done setting TC");
+		// ourLogger.atLevel(getLoggingLevel()).log("Done setting TC");
 	}
 	
 	public static void rollbackActive() {

@@ -19,7 +19,7 @@ import com.siliconage.web.ControllerServlet;
 import com.opal.TransactionContext;
 
 public class OpalFormController extends ControllerServlet {
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalFormController.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalFormController.class.getName());
 	public static final String ACTION_KEY = "OPAL_FORM_ACTION";
 	public static final String SUCCESS_KEY = "OPAL_FORM_SUCCESS";
 	

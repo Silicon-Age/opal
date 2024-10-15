@@ -14,7 +14,7 @@ import com.siliconage.xml.XMLElement;
 
 public class Reference extends OpalXMLElement {
 	
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(Reference.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(Reference.class.getName());
 
 	
 	public Reference(OpalXMLElement argParent, Node argNode) {

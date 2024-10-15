@@ -29,13 +29,8 @@ import com.opal.TransactionContext;
 import com.opal.types.UTCDateTime;
 
 public abstract class OpalRestlet<U extends IdentityUserFacing, A> extends HttpServlet {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalRestlet.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalRestlet.class.getName());
 
 	private static final Gson ourSerializer = new GsonBuilder().disableHtmlEscaping().create();
 

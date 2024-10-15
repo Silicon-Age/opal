@@ -36,7 +36,7 @@ import com.opal.creator.database.RelationalDatabaseAdapter;
 import com.opal.creator.database.TableName;
 
 public class SQLServerAdapter extends RelationalDatabaseAdapter {
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(SQLServerAdapter.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(SQLServerAdapter.class.getName());
 	
 	private static final int UNIQUE_FLAG = 2;
 //	private static final int CLUSTERED = 16;

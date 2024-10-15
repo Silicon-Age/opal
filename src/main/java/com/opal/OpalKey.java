@@ -5,7 +5,7 @@ package com.opal;
  */
 public abstract class OpalKey<O extends Opal<? extends UserFacing>> {
 
-//	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalKey.class.getName());
+//	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalKey.class.getName());
 	
 	protected OpalKey() {
 		super();
