@@ -9,7 +9,7 @@ import com.siliconage.util.UnimplementedOperationException;
 
 public abstract class AbstractIdentityOpalFactory<U extends IdentityUserFacing, O extends IdentityOpal<U>> implements IdentityOpalFactory<U, O> {
 
-//	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(AbstractIdentityOpalFactory.class.getName());
+//	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(AbstractIdentityOpalFactory.class.getName());
 
 	private final OpalCache<O> myCache;
 	

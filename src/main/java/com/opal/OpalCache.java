@@ -7,7 +7,7 @@ import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.Validate;
 
 public final class OpalCache<I extends IdentityOpal<? extends IdentityUserFacing>> {
-	/* package */ static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(OpalCache.class.getName());
+	/* package */ static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(OpalCache.class.getName());
 	
 	private final ReferenceMap<OpalKey<I>, I> myCache;
 

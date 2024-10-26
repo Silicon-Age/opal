@@ -21,7 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 public class Unifier<U extends IdentityUserFacing> {
-	// private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(Unifier.class.getName());
+	// private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(Unifier.class.getName());
 	
 	private final Factory<U> myFactory;
 	private final U myGood;

@@ -12,7 +12,7 @@ import org.apache.commons.lang3.Validate;
 import com.siliconage.util.UnimplementedOperationException;
 
 public abstract class AbstractMoneIdentityOpalFactory<U extends IdentityUserFacing, O extends IdentityOpal<U>> extends AbstractIdentityOpalFactory<U, O> {
-//	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(AbstractMoneIdentityOpalFactory.class.getName());
+//	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(AbstractMoneIdentityOpalFactory.class.getName());
 	
 	protected AbstractMoneIdentityOpalFactory() {
 		super();

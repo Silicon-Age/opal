@@ -6,7 +6,7 @@ package com.opal;
 
 public abstract class AbstractOpalFactoryFactory {
 
-//	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(AbstractOpalFactoryFactory.class.getName());
+//	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(AbstractOpalFactoryFactory.class.getName());
 
 //	private final Map<Class<? extends IdentityUserFacing>, IdentityFactory<?>> myFactories = new HashMap<>();
 	

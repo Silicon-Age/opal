@@ -29,7 +29,7 @@ import com.opal.annotation.CurrentDateTimeDefault;
 import com.siliconage.util.Trinary;
 
 public abstract class FieldUtility {
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(FieldUtility.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(FieldUtility.class.getName());
 	
 	public static Class<?> getType(UserFacing argUF, String argFieldName) {
 		if (argUF == null) {

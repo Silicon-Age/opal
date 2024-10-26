@@ -19,7 +19,7 @@ import com.siliconage.util.UnimplementedOperationException;
 
 public class MappedForeignKey implements Comparable<MappedForeignKey> {
 
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(MappedForeignKey.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(MappedForeignKey.class.getName());
 
 	private final ForeignKey myForeignKey;
 	private final MappedClass mySourceMappedClass;

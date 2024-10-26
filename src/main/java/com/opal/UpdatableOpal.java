@@ -4,7 +4,7 @@ import org.apache.commons.lang3.Validate;
 
 public abstract non-sealed class UpdatableOpal<U extends IdentityUserFacing> extends IdentityOpal<U> {
 
-//	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(UpdatableOpal.class.getName());
+//	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(UpdatableOpal.class.getName());
 	
 	/* Bit field for various status flags. */
 	private static final int MY_OLD_OPAL_EXISTS = 1 << 0;

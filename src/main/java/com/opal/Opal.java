@@ -12,7 +12,7 @@ import org.apache.commons.lang3.Validate;
 
 public interface Opal<U extends UserFacing> /* extends AbstractTransactionAware */ /* implements Serializable */ {
 
-	//	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(Opal.class.getName());
+	//	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(Opal.class.getName());
 	
 	/* THINK:  What, if anything, should be transient? */
 	

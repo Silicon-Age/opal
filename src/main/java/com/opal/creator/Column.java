@@ -1,7 +1,6 @@
 package com.opal.creator;
 
 import org.apache.commons.lang3.Validate;
-// import org.apache.log4j.Level;
 import org.w3c.dom.Node;
 
 import com.siliconage.util.Trinary;

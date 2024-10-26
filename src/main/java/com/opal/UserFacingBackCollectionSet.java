@@ -12,8 +12,7 @@ import com.siliconage.util.UnimplementedOperationException;
 
 public class UserFacingBackCollectionSet<U extends UserFacing, O extends Opal<U>> implements Set<U> {
 
-//	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger
-//		.getLogger(UserFacingBackCollectionSet.class.getName());
+//	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(UserFacingBackCollectionSet.class.getName());
 
 	private final Set<O> myOpalSet;
 	

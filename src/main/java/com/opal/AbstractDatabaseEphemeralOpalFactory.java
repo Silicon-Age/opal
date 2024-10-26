@@ -29,7 +29,7 @@ import com.siliconage.database.DatabaseUtility;
 
 public abstract class AbstractDatabaseEphemeralOpalFactory<U extends UserFacing, O extends Opal<U>> extends AbstractEphemeralOpalFactory<U, O> {
 
-	private static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(AbstractDatabaseEphemeralOpalFactory.class.getName());
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(AbstractDatabaseEphemeralOpalFactory.class.getName());
 	
 	protected AbstractDatabaseEphemeralOpalFactory() {
 		super();

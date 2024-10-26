@@ -13,7 +13,7 @@ import static com.opal.CommitStep.*;
 /* TODO: Figure out the proper synchronization strategy for this class */
 
 public final class TransactionManager {
-	/* package */ static final org.apache.log4j.Logger ourLogger = org.apache.log4j.Logger.getLogger(TransactionManager.class.getName());
+	/* package */ static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(TransactionManager.class.getName());
 	
 	private static final TransactionManager ourInstance = new TransactionManager();
 
