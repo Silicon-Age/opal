@@ -254,16 +254,12 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 	public HiddenField<?> hidden(String argName, String argValue) {
 		requireOpened();
 		
-		if ("Displayed".equals(argName) == false) {
-			noteDisplayedField(argName, true);
-		}
-		
 		return new HiddenField<>(generateFullyQualifiedName(argName), argValue);
 	}
 	
 	protected abstract void recordDescendant(OpalForm<?> argOF);
 	
-	protected void noteDisplayedField(String argName, boolean argMultipleAllowed) {
+	public void noteDisplayedField(String argName, boolean argMultipleAllowed) {
 		Validate.notNull(argName);
 		
 		if (argName.startsWith("Target:") == false) {

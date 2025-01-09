@@ -47,10 +47,15 @@ import com.siliconage.web.form.HiddenField;
 	/* package */ static String generateDigest(Collection<String> argFieldNames, String argDynamicSalt) {
 		MessageDigest lclDigest = DigestUtils.getSha256Digest();
 		
-		List<String> lclHashInputs = new ArrayList<>(argFieldNames);
-		lclHashInputs.sort(null);
+		List<String> lclHashInputs = argFieldNames.stream()
+			.distinct()
+			.sorted()
+			.toList();
 		for (String lclInput : lclHashInputs) {
 			lclDigest.update(lclInput.getBytes(CHARSET));
+		}
+		if (ourLogger.isInfoEnabled()) {
+			ourLogger.info("Generating digest: " + lclHashInputs);
 		}
 		
 		if (STATIC_SALT != null) {
