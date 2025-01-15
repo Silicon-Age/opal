@@ -351,9 +351,10 @@ public class OpalMainForm<U extends IdentityUserFacing> extends OpalForm<U> {
 		}
 		
 		return getConfiguration().beforeClose() +
-			hidden("LoadTime", String.valueOf(getLoadTime())) + 
-			generateHiddenIndicatorsOfDisplayedFields() + 
-			getOutputUponClose() + 
+			hidden("LoadTime", String.valueOf(getLoadTime())) +
+			generateHiddenIndicatorsOfEnabledDisplayedFields() +
+			generateSecurityFields() +
+			getOutputUponClose() +
 			"\n</form>" +
 			getConfiguration().afterCloseBeforeScript() +
 			outputScript() +
@@ -493,20 +494,6 @@ public class OpalMainForm<U extends IdentityUserFacing> extends OpalForm<U> {
 		return getConfiguration().formatErrors(getErrors());
 	}
 	
-//	@Deprecated // Use OpalFormConfiguration.getErrorCssClass()
-//	public String errors(String argStyleName) {
-//		requireOpened();
-//		
-//		acknowledgeErrors();
-//		
-//		return ControllerServlet.generatePassBackErrorHTML(getSession(), getPassBackCode(), argStyleName);
-//	}
-	
-//	@Deprecated // Use displayResultOrErrors()
-//	public String errors() {
-//		return errors("");
-//	}
-	
 	public boolean hasMessages() {
 		return getMessages().isEmpty() == false;
 	}
@@ -520,13 +507,6 @@ public class OpalMainForm<U extends IdentityUserFacing> extends OpalForm<U> {
 		
 		return getConfiguration().formatMessages(getMessages());
 	}
-	
-//	@Deprecated // Use OpalFormConfiguration.getMessageCssClass()
-//	public String messages(String argStyleName) {
-//		requireOpened();
-//		
-//		return ControllerServlet.generatePassBackErrorHTML(getSession(), getPassBackCode(), argStyleName);
-//	}
 
 	@Override
 	public boolean isCompletelyDisabled() {
@@ -589,5 +569,14 @@ public class OpalMainForm<U extends IdentityUserFacing> extends OpalForm<U> {
 			Validate.isTrue(argFieldName.contains(FULLY_QUALIFIED_NAME_SEPARATOR) == false, "Field names should not contain slashes");
 			return generateFullyQualifiedName(argFieldName);
 		}
+	}
+	
+	private String generateSecurityFields() {
+		List<String> lclEnabledDisplayedFieldsEntireForm = new ArrayList<>(getEnabledDisplayedFields());
+		for (OpalForm<?> lclForm : getDescendants()) {
+			lclEnabledDisplayedFieldsEntireForm.addAll(lclForm.getEnabledDisplayedFields());
+		}
+		
+		return OpalFormSecurityUtil.generateSecurityFields(lclEnabledDisplayedFieldsEntireForm);
 	}
 }

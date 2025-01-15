@@ -259,7 +259,7 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 	
 	protected abstract void recordDescendant(OpalForm<?> argOF);
 	
-	protected void noteDisplayedField(String argName, boolean argMultipleAllowed) {
+	public void noteDisplayedField(String argName, boolean argMultipleAllowed) {
 		Validate.notNull(argName);
 		
 		if (argName.startsWith("Target:") == false) {
@@ -284,21 +284,26 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 		myDisplayedFields.add(fullyQualifyIfNecessary(argName));
 	}
 	
+	// CAUTION: These fields might not be enabled!
 	protected Collection<String> getDisplayedFields() {
 		return myDisplayedFields;
 	}
 	
-	protected String generateHiddenIndicatorsOfDisplayedFields() {
+	protected Collection<String> getEnabledDisplayedFields() {
+		return getDisplayedFields().stream()
+			.filter(this::isEnabled)
+			.toList();
+	}
+	
+	protected String generateHiddenIndicatorsOfEnabledDisplayedFields() {
 		requireOpened();
 		
-		Collection<String> lclDisplayedFields = getDisplayedFields();
+		Collection<String> lclEnabledDisplayedFields = getEnabledDisplayedFields();
 		
-		StringBuilder lclSB = new StringBuilder(64 * lclDisplayedFields.size());
+		StringBuilder lclSB = new StringBuilder(64 * lclEnabledDisplayedFields.size());
 		
-		for (String lclFieldName : getDisplayedFields()) {
-			if (isEnabled(lclFieldName)) {
-				lclSB.append(display(lclFieldName));
-			}
+		for (String lclFieldName : lclEnabledDisplayedFields) {
+			lclSB.append(display(lclFieldName));
 		}
 		
 		return lclSB.toString();
@@ -309,13 +314,7 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 		
 		requireOpened();
 		
-		/* I think that updates that I am making on 8/31/2010 should mean that this is never called with isDisabled
-		 * equal to true.  I should probably change that to generate an IllegalStateException. */
-		if (isEnabled(argName)) { // THINK: We're re-checking this relative to generateHiddenIndicatorsOfDisplayedFields(); is that necessary?
-			return hidden("Displayed", argName);
-		} else {
-			return NullField.getInstance();
-		}
+		return hidden("Displayed", argName);
 	}
 	
 	public String id(String argName) {
@@ -724,9 +723,9 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 	}
 	
 	public ButtonField<?> button(String argName, String argValue) {
-		noteDisplayedField(argName, true);
-		
 		requireOpened();
+		
+		noteDisplayedField(argName, true);
 		
 		return new ButtonField<>(generateFullyQualifiedName(argName), argValue);
 	}
@@ -844,7 +843,9 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 			}
 			
 			for (T lclChild : lclChildren) {
-				lclOFs.add(new OpalSubform<>(this, argName + FULLY_QUALIFIED_NAME_SEPARATOR + lclIndex, lclChild, argFactory));
+				OpalForm<T> lclOF = new OpalSubform<>(this, argName + FULLY_QUALIFIED_NAME_SEPARATOR + lclIndex, lclChild, argFactory);
+				recordDescendant(lclOF);
+				lclOFs.add(lclOF);
 				++lclIndex;
 			}
 		}
@@ -896,7 +897,11 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 	
 	public <T extends IdentityUserFacing> OpalForm<T> targetForm(String argName, IdentityFactory<T> argFactory) {
 		noteDisplayedField("Target:" + argName, true); // THINK: should this be false?
-		return new OpalSubform<>(this, argName, target(argName, argFactory), argFactory);
+		
+		OpalForm<T> lclOF = new OpalSubform<>(this, argName, target(argName, argFactory), argFactory);
+		recordDescendant(lclOF);
+		
+		return lclOF;
 	}
 	
 	public Class<? extends OpalFormUpdater<U>> getUpdaterClass() {

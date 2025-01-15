@@ -2,18 +2,24 @@ package com.opal.cma;
 
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.ArrayDeque;
+import java.util.Map;
 import java.util.stream.Collectors;
+import javax.naming.InitialContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.siliconage.util.NetworkUtils;
 import com.siliconage.web.ControllerServlet;
 
 import com.opal.TransactionContext;
@@ -32,17 +38,31 @@ public class OpalFormController extends ControllerServlet {
 	
 	@Override
 	protected String processInternal(HttpServletRequest argRequest, HttpSession argSession, String argUsername) throws Exception {
-		String lclUniqueStringParameterName = argRequest.getParameter(OpalForm.FULLY_QUALIFIED_NAME_SEPARATOR + "UniqueStringParameterName");
-		
-		if (lclUniqueStringParameterName == null) {
-			List<Pair<String, String>> lclParameterList = argRequest.getParameterMap().entrySet().stream()
-				.map(argEntry -> Pair.of(argEntry.getKey(), Arrays.toString(argEntry.getValue())))
-				.collect(Collectors.toList());
+		boolean lclPassedSecurityCheck = checkSecurityDigest(argRequest);
+		if (lclPassedSecurityCheck == false) {
+			List<Pair<String, String>> lclParameterList = getParameterList(argRequest);
 			String lclRequestURL = argRequest.getRequestURL().toString();
+			ourLogger.warn(
+				"Failed security check on OpalForm.\n" +
+				"IP: " + NetworkUtils.getClientIpAddress(argRequest) + '\n' +
+				"Referer: " + argRequest.getHeader("referer") + '\n' + 
+				"Request: " + lclRequestURL + '\n' +
+				"Query string: " + argRequest.getQueryString() + '\n' +
+				"Parameter map: " + lclParameterList.toString()
+			);
 			
+			// This should really result in an error status code, namely HTTP 400 Bad Request. Our current framework doesn't really allow that, but we should change it so it does.
+			throw new IllegalArgumentException("Security check failed");
+		}
+		
+		
+		String lclUniqueStringParameterName = argRequest.getParameter(OpalForm.FULLY_QUALIFIED_NAME_SEPARATOR + "UniqueStringParameterName");
+		if (lclUniqueStringParameterName == null) {
+			List<Pair<String, String>> lclParameterList = getParameterList(argRequest);
+			String lclRequestURL = argRequest.getRequestURL().toString();
 			ourLogger.warn(
 				"Missing /UniqueStringParameterName in OpalForm.\n" +
-				"IP: " + ObjectUtils.firstNonNull(argRequest.getHeader("X-Forwarded-For"), argRequest.getRemoteAddr()) + '\n' +
+				"IP: " + NetworkUtils.getClientIpAddress(argRequest) + '\n' +
 				"Referer: " + argRequest.getHeader("referer") + '\n' + 
 				"Request: " + lclRequestURL + '\n' +
 				"Query string: " + argRequest.getQueryString() + '\n' +
@@ -119,7 +139,7 @@ public class OpalFormController extends ControllerServlet {
 							lclOFU.afterCommit();
 							lclOFU.runChildrenAfterCommits();
 							
-							// Update the update timestamp records for everything
+							// Update the update-timestamp records for everything
 							OpalFormUpdateTimes lclCache = OpalFormUpdateTimes.getInstance();
 							Queue<OpalFormUpdater<?>> lclUpdaters = new ArrayDeque<>();
 							lclUpdaters.add(lclOFU);
@@ -153,5 +173,33 @@ public class OpalFormController extends ControllerServlet {
 					throw new IllegalStateException("Unknown action");
 			}
 		}
+	}
+	
+	private boolean checkSecurityDigest(HttpServletRequest argRequest) {
+		String lclDynamicSalt = argRequest.getParameter(OpalFormSecurityUtil.DYNAMIC_SALT_FIELD_NAME);
+		if (StringUtils.isBlank(lclDynamicSalt)) {
+			return false;
+		}
+		
+		String lclProvidedDigest = argRequest.getParameter(OpalFormSecurityUtil.DIGEST_FIELD_NAME);
+		if (StringUtils.isBlank(lclProvidedDigest)) {
+			return false;
+		}
+		
+		List<String> lclDisplayed = new ArrayList<>();
+		for (Map.Entry<String, String[]> lclEntry : argRequest.getParameterMap().entrySet()) {
+			if (lclEntry.getKey().endsWith(OpalForm.FULLY_QUALIFIED_NAME_SEPARATOR + "Displayed")) { // Is there a better way to do this, making sure we get the descendant forms' displayed fields too?
+				lclDisplayed.addAll(Arrays.asList(lclEntry.getValue()));
+			}
+		}
+		
+		String lclExpectedDigest = OpalFormSecurityUtil.generateDigest(lclDisplayed, lclDynamicSalt);
+		return lclProvidedDigest.equals(lclExpectedDigest);
+	}
+	
+	private List<Pair<String, String>> getParameterList(HttpServletRequest argRequest) {
+		return argRequest.getParameterMap().entrySet().stream()
+			.map(argEntry -> Pair.of(argEntry.getKey(), Arrays.toString(argEntry.getValue())))
+			.toList();
 	}
 }
