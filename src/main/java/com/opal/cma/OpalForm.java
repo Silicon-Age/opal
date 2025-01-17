@@ -202,7 +202,7 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 	
 	protected void setClosed() {
 		if (isClosed()) {
-			ourLogger.warn("A form on " + getRequest().getRequestURI() + " for " + getFactory().getUserFacingInterface() + " is being closed more than once");
+			ourLogger.warn("Form " + this + " on " + getRequest().getRequestURI() + " for " + getFactory().getUserFacingInterface() + " is being closed more than once");
 		}
 		
 		myClosed = true;

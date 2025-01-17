@@ -335,7 +335,11 @@ public class OpalMainForm<U extends IdentityUserFacing> extends OpalForm<U> {
 		
 		for (OpalForm<?> lclDesc : getDescendants()) {
 			if (lclDesc.isClosed() == false) {
-				ourLogger.warn("A descendant form on " + getRequest().getRequestURI() + " for " + lclDesc.getFactory().getUserFacingInterface() + " has not been closed");
+				if (lclDesc.isOpened()) {
+					ourLogger.warn("Descendant form " + lclDesc + " for " + lclDesc.getUserFacing() + " on " + getRequest().getRequestURI() + " (" + lclDesc.getFactory().getUserFacingInterface() + ") has not been closed");
+				} else {
+					ourLogger.warn("Descendant form " + lclDesc + " for " + lclDesc.getUserFacing() + " on " + getRequest().getRequestURI() + " (" + lclDesc.getFactory().getUserFacingInterface() + ") has not been opened (or closed)");
+				}
 			}
 		}
 		
