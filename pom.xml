@@ -9,7 +9,7 @@
 	
 	<groupId>com.opal</groupId>
 	<artifactId>opal</artifactId>
-	<version>1.2.0</version>
+	<version>2.0.0</version>
 	
 	<properties>
 		<maven.compiler.source>21</maven.compiler.source>
@@ -32,9 +32,9 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>5.0.0</version>
 		</dependency>
 		
 		<dependency>

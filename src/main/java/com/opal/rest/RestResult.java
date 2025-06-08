@@ -1,6 +1,6 @@
 package com.opal.rest;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.google.gson.JsonObject;
 
