@@ -341,6 +341,7 @@ public class MappedClass {
 			final String lclICN = getFullyQualifiedInterfaceClassName();
 			final String lclOCN = getFullyQualifiedOpalClassName();
 			
+			lclBW.println("@javax.annotation.Generated(\"com.opal\")");
 			if (isDeprecated()) {
 				lclBW.println("@Deprecated");
 			}
@@ -928,6 +929,7 @@ public class MappedClass {
 			
 			Class<?> lclOpalFactoryClass = isEphemeral() ? OpalFactory.class : IdentityOpalFactory.class;
 			
+			lclBW.println("@javax.annotation.Generated(\"com.opal\")");
 			if (isDeprecated()) {
 				lclBW.println("@Deprecated");
 			}
@@ -1033,7 +1035,7 @@ public class MappedClass {
 			/* Create a factory method for each unique key */
 			for (MappedUniqueKey lclMUK : getMappedUniqueKeys()) {
 				
-				lclBW.print("\tpublic " + getInterfaceClassName() + ' ' + lclMUK.generateFactoryMethodName() + "(");				
+				lclBW.print("\tpublic " + getInterfaceClassName() + ' ' + lclMUK.generateFactoryMethodName() + "(");
 				lclBW.print(lclMUK.generateFactoryMethodArguments());
 				lclBW.println(") {");
 				
@@ -1383,6 +1385,7 @@ public class MappedClass {
 			
 			final String lclUFCN = getUserFacingClassName();
 			
+			lclBW.println("@javax.annotation.Generated(\"com.opal\")");
 			if (isDeprecated()) {
 				lclBW.println("@Deprecated");
 			}
@@ -2037,7 +2040,7 @@ public class MappedClass {
 											lclBW.println("\t\treturn this." + lclMFK1.getStreamMethodName() + "().filter(argK::matches).findAny().orElse(null);");
 										}
 										lclBW.println("\t}");
-										lclBW.println();										
+										lclBW.println();
 									}
 								}
 							}
@@ -2240,6 +2243,7 @@ public class MappedClass {
 			
 			String lclSuperClassName = lclSuperClass.getName();
 			
+			lclBW.println("@javax.annotation.Generated(\"com.opal\")");
 			if (isDeprecated()) {
 				lclBW.println("@Deprecated");
 			}
@@ -2292,7 +2296,7 @@ public class MappedClass {
 			} else {
 //				lclBW.println("\tpublic " + getOpalClassName() + "(@SuppressWarnings(\"unused\") " + lclOpalFactoryClass.getName() + '<' + lclICN + ", " + lclOCN + "> argOpalFactory, Object[] argValues) {");
 				lclBW.println("\tpublic " + getOpalClassName() + "(Object[] argValues) {");
-			}				
+			}
 			if (isEphemeral() == false) {
 				lclBW.println("\t\tsuper(argOpalFactory, argValues);");
 			} else {
@@ -3127,11 +3131,11 @@ public class MappedClass {
 				/* getUniqueStringKeyWhereClauseValues() */
 				/* THINK: Should this return values from getNewValues() when it is part of cascading foreign key?  If not, it can't call getPKWCV() */
 				lclBW.println("\t@Override");
-				lclBW.println("\tpublic Object[] getUniqueStringKeyWhereClauseValues() {");				
+				lclBW.println("\tpublic Object[] getUniqueStringKeyWhereClauseValues() {");
 				MappedUniqueKey lclUSK = Validate.notNull(getUniqueStringKey());
 				if (lclUSK == lclPK) {
 					lclBW.println("\t\treturn getPrimaryKeyWhereClauseValues();");
-				} else {				
+				} else {
 					lclBW.print("\t\treturn new Object[] {");
 					lclCMI = lclUSK.createClassMemberIterator();
 					while (lclCMI.hasNext()) {
@@ -3256,7 +3260,7 @@ public class MappedClass {
 					lclBW.println("\t\t\t" + lclV + " = retrieve" + lclMFK.getRoleSourceOpalFieldName() +"(getValues());");
 					lclBW.println("\t\t\t" + lclMFK.getOldRoleSourceOpalFieldName() + " = " + lclV + ';');
 					lclBW.println("\t\t}");
-				}					
+				}
 				lclBW.println("\t\treturn " + lclV + ';');
 				lclBW.println("\t}");
 				lclBW.println();
@@ -3437,7 +3441,7 @@ public class MappedClass {
 								case WEAK:
 									lclFieldTypeWithReference = lclReferenceClass.getName() + "<" + lclDeclaredTypeName + lclTA + ">";
 									break;
-								default: throw new IllegalStateException();															
+								default: throw new IllegalStateException();
 							}
 							String lclLoaderMemberName = lclMFK.getRoleCollectionLoaderName();
 							String lclChildFactoryAccessorName = "get" + lclSMC.getOpalFactoryInterfaceName();
@@ -3636,6 +3640,7 @@ public class MappedClass {
 			
 			Class<?> lclOpalFactoryClass = isEphemeral() ? OpalFactory.class : IdentityOpalFactory.class;
 			
+			lclBW.println("@javax.annotation.Generated(\"com.opal\")");
 			if (isDeprecated()) {
 				lclBW.println("@Deprecated");
 			}
@@ -3747,8 +3752,9 @@ public class MappedClass {
 			lclBW.println("import " + getFullyQualifiedOpalFactoryInterfaceName() + ';');
 			lclBW.println();
 			
+			lclBW.println("@javax.annotation.Generated(\"com.opal\")");
 			if (isDeprecated()) {
-				lclBW.println("\t@Deprecated");
+				lclBW.println("@Deprecated");
 			}
 			
 			/* At some point, we need to figure out whether ephemeral Mone opals are allowed. */
@@ -5825,7 +5831,7 @@ public class MappedClass {
 								lclI += lclFieldName.length();
 								lclI += 2; // Account for the percent signs
 								continue; // continue the while loop
-							}						
+							}
 							MappedForeignKey lclMFK = findForeignKeyByRoleSourceFieldName(lclFieldName);
 							if (lclMFK != null) {
 								lclSB.append("getUserFacing().");
@@ -5843,7 +5849,7 @@ public class MappedClass {
 						complain(MessageLevel.Error, "Percent sign at end of expression in computed-column expression for " + lclCM.getBaseMemberName() + ".");
 						lclSB.setLength(0);
 						break;
-					}					
+					}
 				} else {
 					lclSB.append(lclC);
 					++lclI;
