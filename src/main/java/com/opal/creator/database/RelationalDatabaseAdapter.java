@@ -160,6 +160,7 @@ public abstract class RelationalDatabaseAdapter {
 			lclBW.println("import " + argMC.getFullyQualifiedOpalFactoryInterfaceName() + ';');
 			lclBW.println();
 			
+			lclBW.println("@javax.annotation.Generated(\"com.opal\")");
 			if (argMC.isDeprecated()) {
 				lclBW.println("\t@Deprecated");
 			}
@@ -1221,7 +1222,7 @@ public abstract class RelationalDatabaseAdapter {
 						}
 					}
 				}
-				if (lclAllUnmapped == false) {	
+				if (lclAllUnmapped == false) {
 					argMappedClass.complain(MessageLevel.Warning, "Ignoring foreign key " + lclFK + " as its target could not be found (but at least one column in the source key is mapped).");
 				} else {
 					argMappedClass.complain(MessageLevel.Info, "Ignoring foreign key " + lclFK + " as its target could not be found (but all columns in the source key are unmapped).");
