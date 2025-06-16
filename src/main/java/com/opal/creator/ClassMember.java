@@ -49,6 +49,8 @@ public class ClassMember {
 	private Trinary myInverseAccessor = Trinary.UNKNOWN;
 	private String myInverseAccessorMethodName;
 	private Trinary myNullAllowed = Trinary.UNKNOWN;
+	
+	private String myStaticBindingsQuery;
 
 	private String myValidationMethodName;
 	private String myValidationMethodClassName;
@@ -352,6 +354,14 @@ public class ClassMember {
 	
 	public void setNullAllowed(boolean argNullable) {
 		myNullAllowed = Trinary.valueOf(argNullable);
+	}
+	
+	public String getStaticBindingsQuery() {
+		return myStaticBindingsQuery;
+	}
+	
+	public void setStaticBindingsQuery(String argStaticBindingsQuery) {
+		myStaticBindingsQuery = argStaticBindingsQuery;
 	}
 	
 	/* package */ boolean isUnique(MappedClass argMC) {

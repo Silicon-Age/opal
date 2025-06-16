@@ -172,7 +172,7 @@ public class MappedClass {
 	private boolean myGetAll;
 	private boolean myDependent;
 	private boolean myAssociation;
-	private List<String> myStaticBindingList;
+	private List<StaticBinding> myStaticBindingList;
 	
 	private PolymorphicData myPolymorphicData;
 	private boolean mySuperclassKeyResolved = false;
@@ -1006,8 +1006,11 @@ public class MappedClass {
 				/* TODO:  This fails when the name of the variable differs from the code used (like when it starts with a number
 				and needs to have an underscore prepended to make a valid Java identifier. */
 				
-				for (String lclCode : getStaticBindingList()) {
-					lclBW.println("\tpublic static final " + getInterfaceClassName() + ' ' + Mapping.convertToJavaIdentifier(lclCode) + "() { return getInstance().forCode(\"" + lclCode + "\"); }");
+				for (StaticBinding lclStaticBinding : getStaticBindingList()) {
+					String lclMemberName = lclStaticBinding.memberName();
+					String lclCode = lclStaticBinding.code();
+					
+					lclBW.println("\tpublic static final " + getInterfaceClassName() + ' ' + Mapping.convertToJavaIdentifier(lclCode).toUpperCase() + "() { return getInstance().for" + lclMemberName + "(\"" + lclCode + "\"); }");
 				}
 				lclBW.println();
 			}
@@ -5016,11 +5019,11 @@ public class MappedClass {
 		return myGetAll;
 	}
 	
-	public List<String> getStaticBindingList() {
+	public List<StaticBinding> getStaticBindingList() {
 		return myStaticBindingList;
 	}
 	
-	public void setStaticBindings(ArrayList<String> argStaticBindingList) {
+	public void setStaticBindings(List<StaticBinding> argStaticBindingList) {
 		myStaticBindingList = argStaticBindingList;
 	}
 	

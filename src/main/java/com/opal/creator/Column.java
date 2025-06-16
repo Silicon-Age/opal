@@ -1,6 +1,8 @@
 package com.opal.creator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+
 import org.w3c.dom.Node;
 
 import com.siliconage.util.Trinary;
@@ -118,6 +120,11 @@ public class Column extends OpalXMLElement {
 			lclCM.setNullAllowed(false);
 		}
 		
+		String lclStaticBindingsForString = getAttributeValue("StaticBindingsFor");
+		if (StringUtils.isNotBlank(lclStaticBindingsForString)) {
+			lclCM.setStaticBindingsQuery(lclStaticBindingsForString);
+		}
+		
 		String lclComputedString = getAttributeValue("Computed");
 		if (lclComputedString == null) {
 			/* Nothing */
@@ -142,7 +149,6 @@ public class Column extends OpalXMLElement {
 		} else {
 			throw new IllegalStateException("Illegal value \"" + lclComputedString + "\" for Computed attribute.");
 		}
-		return;
 	}
 	
 	@Override

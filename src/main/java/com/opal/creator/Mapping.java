@@ -8,8 +8,11 @@ import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -328,12 +331,16 @@ public class Mapping extends OpalXMLElement {
 		while (lclI.hasNext()) {
 			ClassMember lclCM = lclI.next();
 			
-			/* And whose single column is named "code" and has type String. */
-			if (lclCM.isMapped() && lclCM.getDatabaseColumn().getName().equalsIgnoreCase("Code") && lclCM.getMemberType() == String.class) {
+			boolean lclGenerateCodes =
+				lclCM.isMapped() &&
+				lclCM.getMemberType() == String.class &&
+				(lclCM.getDatabaseColumn().getName().equalsIgnoreCase("Code") || StringUtils.isNotBlank(lclCM.getStaticBindingsQuery()));
+			
+			if (lclGenerateCodes) {
 				/* We've found a suitable index to support compile-time list of objects. */
 				
 //					System.out.println("Found codes for " + getMappedClass().getOpalClassName());
-				ArrayList<String> lclCodes = new ArrayList<>();
+				List<StaticBinding> lclStaticBindings = new ArrayList<>();
 				
 				/* Load the alphanumeric identifiers ("codes") from the database. */
 				
@@ -341,20 +348,27 @@ public class Mapping extends OpalXMLElement {
 				ResultSet lclRS = null;
 				try {
 					lclConn = argContext.getRelationalDatabaseAdapter().getDataSource().getConnection();
-					lclRS = DatabaseUtility.select(lclConn, "SELECT " + lclCM.getDatabaseColumn().getName() + " FROM " + getMappedClass().getTableName() + " ORDER BY " + lclCM.getDatabaseColumn().getName());
+					
+					String lclQuery = "SELECT " + lclCM.getDatabaseColumn().getName() + " FROM " + getMappedClass().getTableName();
+					if (StringUtils.isNotBlank(lclCM.getStaticBindingsQuery())) {
+						lclQuery += " WHERE " + lclCM.getStaticBindingsQuery();
+					}
+					lclQuery += " ORDER BY " + lclCM.getDatabaseColumn().getName();
+					
+					lclRS = DatabaseUtility.select(lclConn, lclQuery);
 					
 					/* Make sure that each one is a valid Java identifier */
 					
 					while (lclRS.next()) {
-						String lclCode = lclRS.getString("code");
-						lclCodes.add(lclCode);
+						String lclCode = lclRS.getString(lclCM.getDatabaseColumn().getName());
+						lclStaticBindings.add(new StaticBinding(lclCM.getBaseMemberName(), lclCode));
 					}
 					
 					/* Store the list in the MappedClass object so that the it can be referenced
 					 * when the source code for the interface is generated. */
 					
-					if (lclCodes.isEmpty() == false) {
-						getMappedClass().setStaticBindings(lclCodes);
+					if (lclStaticBindings.isEmpty() == false) {
+						getMappedClass().setStaticBindings(lclStaticBindings);
 					}
 				} finally {
 					DatabaseUtility.cleanUp(lclRS, lclConn);

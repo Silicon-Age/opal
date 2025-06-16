@@ -21,7 +21,7 @@ public class XMLCreator {
 
 	/* These member variables store the database configuration information that is passed in via the command-line.  Similar
 	 * data can be provided via the <Database> element in the configuration file, but it is preferred to pass via the
-	 * command-line for security reasons (as the configuration file is often checked into a repository.
+	 * command-line for security reasons (as the configuration file is often checked into a repository).
 	 * 
 	 * The <Database> element will take priority over anything passed in on the command line.
 	 */
