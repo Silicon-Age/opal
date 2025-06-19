@@ -10,8 +10,8 @@ import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.naming.InitialContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.ObjectUtils;

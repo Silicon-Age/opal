@@ -2,7 +2,7 @@ package com.opal.rest;
 
 import java.util.Collection;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.opal.IdentityUserFacing;
 
