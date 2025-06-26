@@ -1462,6 +1462,7 @@ public class OpalFormUpdater<U extends IdentityUserFacing> {
 	// Could override in subclasses
 	// argFieldName is present so that an overriding method can be selective, e.g. if argFieldName is x, then do y, otherwise call super.convert
 	protected <T> T convert(@SuppressWarnings("unused") String argFieldName, Class<T> argTargetType, Object argInput) {
+		// For dates and datetimes, we're implicitly relying on the OpalUtility to use the same formats as DateField.WIRE_FORMAT and DateTimeField.WIRE_FORMAT, which themselves come from the HTML specification
 		return OpalUtility.convertTo(argTargetType, argInput);
 	}
 }
