@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +40,6 @@ import com.siliconage.web.form.MoneyField;
 import com.siliconage.web.form.NameCodeExtractor;
 import com.siliconage.web.form.NullField;
 import com.siliconage.web.form.NumberField;
-import com.siliconage.web.form.OffsetDateTimeField;
 import com.siliconage.web.form.PasswordField;
 import com.siliconage.web.form.PhoneField;
 import com.siliconage.web.form.PriorInput;
@@ -548,16 +546,6 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 		noteDisplayedField(argName, false);
 		
 		return prepareField(new DateTimeField<>(generateFullyQualifiedName(argName), (LocalDateTime) getSavedValue(argName), this), argName);
-	}
-	
-	public OffsetDateTimeField<?> offsetDateTime(String argName) {
-		Validate.notNull(argName);
-		
-		requireOpened();
-		
-		noteDisplayedField(argName, false);
-		
-		return prepareField(new OffsetDateTimeField<>(generateFullyQualifiedName(argName), (OffsetDateTime) getSavedValue(argName), this), argName);
 	}
 	
 	public TimeField<?> time(String argName) {
