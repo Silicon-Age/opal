@@ -535,10 +535,6 @@ public abstract class OpalForm<U extends IdentityUserFacing> implements FormValu
 	}
 	
 	public DateTimeField<?> datetime(String argName) {
-		return dateAndTime(argName);
-	}
-	
-	public DateTimeField<?> dateAndTime(String argName) {
 		Validate.notNull(argName);
 		
 		requireOpened();
