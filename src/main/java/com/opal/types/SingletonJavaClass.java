@@ -7,15 +7,17 @@ import java.lang.reflect.Modifier;
 import org.apache.commons.lang3.Validate;
 
 public class SingletonJavaClass<T> extends JavaClass<T> {
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(SingletonJavaClass.class.getName());
+	
 	private final Method myInstanceAccessor;
 	
-	protected SingletonJavaClass(String argClassName) {
+	protected SingletonJavaClass(String argClassName) throws ClassNotFoundException {
 		super(argClassName);
 		
 		myInstanceAccessor = findInstanceAccessor(null);
 	}
 	
-	protected SingletonJavaClass(String argClassName, String argInstanceAccessorName) {
+	protected SingletonJavaClass(String argClassName, String argInstanceAccessorName) throws ClassNotFoundException {
 		super(argClassName);
 		
 		myInstanceAccessor = findInstanceAccessor(Validate.notNull(argInstanceAccessorName, "Could not find instance accessor '" + argInstanceAccessorName + "' for " + argClassName));
@@ -76,7 +78,12 @@ public class SingletonJavaClass<T> extends JavaClass<T> {
 	}
 	
 	public static <U> SingletonJavaClass<U> fromSerializedString(String argClassName) {
-		return new SingletonJavaClass<>(argClassName);
+		try {
+			return new SingletonJavaClass<>(argClassName);
+		} catch (ClassNotFoundException lclE) {
+			ourLogger.warn("Couldn't find {}", argClassName);
+			return null;
+		}
 	}
 	
 	@Override
