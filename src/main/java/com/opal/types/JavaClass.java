@@ -6,23 +6,18 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 
 public class JavaClass<T> implements StringSerializable, Comparable<JavaClass<?>> {
-
+	private static final org.slf4j.Logger ourLogger = org.slf4j.LoggerFactory.getLogger(JavaClass.class.getName());
+	
 	private final String myClassName;
 	private final Class<T> myClass;
 
 	@SuppressWarnings("unchecked")
-	public JavaClass(String argClassName) {
+	protected JavaClass(String argClassName) throws ClassNotFoundException {
 		super();
 		
 		myClassName = Validate.notNull(argClassName);
 		
-		Class<T> lclClass;
-		try {
-			lclClass = (Class<T>) Class.forName(argClassName);
-		} catch (ClassNotFoundException lclE) {
-			throw new IllegalArgumentException("Could not find class " + argClassName, lclE);
-		}
-		myClass = lclClass;
+		myClass = (Class<T>) Class.forName(argClassName); // may throw ClassNotFoundException
 	}
 
 	public String getClassName() {
@@ -60,7 +55,12 @@ public class JavaClass<T> implements StringSerializable, Comparable<JavaClass<?>
 	}
 	
 	public static <U> JavaClass<U> fromSerializedString(String argClassName) {
-		return new JavaClass<>(argClassName);
+		try {
+			return new JavaClass<>(argClassName);
+		} catch (ClassNotFoundException lclE) {
+			ourLogger.warn("Couldn't find {}", argClassName);
+			return null;
+		}
 	}
 	
 	@Override
